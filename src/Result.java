@@ -1,37 +1,23 @@
-
-public class Result {
-
+public class Result {	
 	Auction auction;
-	BiddingAgent agent;
-	double actual_payment;
-	int index;
-	public Result(int i , Auction a, double price)
-	{
-		auction=a;
-		index=i;
-		actual_payment=price;
-		agent=a.getWinner();
+	boolean is_winner;
+	double payment;
+	
+	public Result(Auction auction, boolean is_winner, double payment) {
+		this.auction = auction;
+		this.is_winner = is_winner;
+		this.payment = payment;
 	}
-	public int getAuctionIndex()
-	{
-		return index;
+	
+	public Auction getAuction() {
+		return auction;
 	}
-	public double getCost()
-	{
-		return actual_payment;
+	
+	public double getPayment() {
+		return payment;
 	}
-	public double getRevenue()
-	{
-		double[] valuation_list=agent.getValuationList();
-		if(index<valuation_list.length)
-		{
-		return valuation_list[index];
-		}
-		else 
-			return 0;
-	}
-	public double getProfit()
-	{
-		return getCost()-getProfit();
+	
+	public boolean getIsWinner() {
+		return is_winner;
 	}
 }
