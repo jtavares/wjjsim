@@ -66,7 +66,7 @@ public class Simulator {
 				auctions.add(new SBNPAuction(i, Math.random(), agents, pay));
 		}
 
-		SSBNPSimulation sim = new SSBNPSimulation(agents, auctions);
+		SSBSimulation sim = new SSBSimulation(agents, auctions);
 		sim.play();
 		sim.report();
 	}

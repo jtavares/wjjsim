@@ -1,13 +1,13 @@
 import java.util.List;
 
 
-public class SSBNPSimulation {
+public class SSBSimulation {
 	// Implements a simultaneous, sealed-bid, auction for n agents and m goods.
 	
 	List<Agent> agents;
 	List<Auction> auctions;
 	
-	public SSBNPSimulation(List<Agent> agents, List<Auction> auctions) {
+	public SSBSimulation(List<Agent> agents, List<Auction> auctions) {
 		this.agents = agents;
 		this.auctions = auctions;
 	}
