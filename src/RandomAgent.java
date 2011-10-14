@@ -2,7 +2,8 @@ import java.util.List;
 
 
 public class RandomAgent extends Agent {
-
+	// An agent that bids randomly in auctions, regardless of his true value.
+	
 	public RandomAgent(int agent_idx, Valuation valuation) {
 		super(agent_idx, valuation);
 	}
@@ -22,5 +23,4 @@ public class RandomAgent extends Agent {
 
 		return bid_list;
 	}
-
 }

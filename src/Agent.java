@@ -58,17 +58,25 @@ public abstract class Agent {
 		
 		// To compute total valuation, we create a basket of the winning auction numbers
 		// and pass that to the underlying valuation engine.
+		String str_won = "";
 		HashSet<Integer> won = new HashSet<Integer>();		
 		for (Result r : results) {
 			total_payment += r.getPayment();
 			
-			if (r.getIsWinner())
-				won.add(r.getAuction().getAuctionIdx());			
+			if (r.getIsWinner()) {
+				won.add(r.getAuction().getAuctionIdx());
+				
+				if (!str_won.equals(""))
+					str_won += ", ";
+				
+				str_won += r.getAuction().getAuctionIdx();
+			}
 		}
 		
-		double total_valuation = valuation.getValue(won);
-
-		return "Agent=" + agent_idx + ", tot_valuation=" + total_valuation + ", tot_payment=" + total_payment + ", total_profit=" + (total_valuation - total_payment);
+		double total_valuation = valuation.getValue(won);	
+		
+		return "AGENT " + agent_idx + "\n\tvaluation=" + total_valuation + ", payments=" +
+			total_payment + ", profit=" + (total_valuation - total_payment) + "\n\tauctions won={" + str_won + "}\n";
 	}
 	
 	// For multi-round auctions, post the results from the previous round. For each item, 

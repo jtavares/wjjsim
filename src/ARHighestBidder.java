@@ -1,4 +1,5 @@
 import java.util.List;
+import java.util.Vector;
 
 
 public class ARHighestBidder extends AllocationRule {
@@ -9,27 +10,36 @@ public class ARHighestBidder extends AllocationRule {
 	}
 	
 	// Award the auction to the highest bidder, but only if that bid is greater than the reserve price.
+	// Ties are broken randomly.
 	public int apply(List<Bid> bids) {
 		// Error check
 		if (bids.size() == 0)
 			return 0;
 		
-		// Find maximum bid
-		Bid winning = bids.get(0);
+		// Find set of maximal bids
+		Vector<Bid> winners = new Vector<Bid>(bids.size());
+		winners.add(bids.get(0));
 		
 		for (Bid b : bids) {
-			winning.setIsWinner(false);
-
-			if (b.getBid() > winning.getBid())
-				winning = b;
+			b.setIsWinner(false);
+	
+			if (b.getBid() > winners.get(0).getBid()) {
+				winners.clear();
+				winners.add(b);
+			} else if (b.getBid() == winners.get(0).getBid()) {
+				winners.add(b);
+			}
 		}
-		
-		// Mark the highest bid as winner, so long as it is at or above reserve price
-		if (winning.getBid() >= reserve_price) {
-			winning.setIsWinner(true);
+	
+		// Choose a random high bidder
+		int w  = (int)(winners.size() * Math.random());
+				
+		// Mark the highest random bid as winner, so long as it is at or above reserve price
+		if (winners.get(w).getBid() >= reserve_price) {
+			winners.get(w).setIsWinner(true);
 			return 1;
 		} else {
 			return 0;
 		}
-	}
+	}	
 }

@@ -4,6 +4,7 @@ import java.util.List;
 
 public abstract class Auction {
 	int auction_idx;
+	double reserve_price;
 	List<Agent> agents;
 	
 	// To be filled by sub-class:
@@ -17,9 +18,10 @@ public abstract class Auction {
 	int no_winners;
 	double total_revenue;
 	
-	public Auction(int auction_idx, List<Agent> agents) {
+	public Auction(int auction_idx, double reserve_price, List<Agent> agents) {
 		this.auction_idx = auction_idx;
 		this.agents = agents;
+		this.reserve_price = reserve_price;
 		
 		bids = new ArrayList<Bid>(agents.size());
 		for (Agent a : agents)
@@ -52,5 +54,9 @@ public abstract class Auction {
 	
 	public double getTotalRevenue() {
 		return total_revenue;
+	}
+	
+	public double getReservePrice() {
+		return reserve_price;
 	}
 }
