@@ -19,7 +19,7 @@ public class Simulator {
 		System.out.print("Agent bid logic [0=random, 1=straight value]> ");
 		int bid_logic = sc.nextInt();
 		
-		System.out.print("Agent valuation model [0=uniform additive, 1=substitutes, 2=compliments]> ");
+		System.out.print("Agent valuation model [0=uniform additive, 1=substitutes, 2=complements]> ");
 		int valuation = sc.nextInt();
 
 		System.out.print("Please enter no. of agents> ");
@@ -41,9 +41,9 @@ public class Simulator {
 			if (valuation == 0)
 				v = new UniformAdditiveValuation(no_auctions);
 			else if (valuation == 1)
-				v = new PureSubstitutesValuation(no_auctions);
+				v = new PerfectSubstitutesValuation(no_auctions);
 			else if (valuation == 2)
-				v = new PureComplimentsValuation(no_auctions);
+				v = new PerfectComplementsValuation(no_auctions);
 			else
 				System.out.println("Invalid Valuation Model");
 			

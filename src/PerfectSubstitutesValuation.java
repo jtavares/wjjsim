@@ -1,10 +1,10 @@
 import java.util.Set;
 
 
-public class PureSubstitutesValuation extends Valuation {
+public class PerfectSubstitutesValuation extends Valuation {
 	// A valuation function where value 1 is obtained when AT LEAST ONE good is obtained, but NEVER more. 0 if no goods obtained.
 	
-	public PureSubstitutesValuation(int n) {
+	public PerfectSubstitutesValuation(int n) {
 		super(n);
 	}
 
