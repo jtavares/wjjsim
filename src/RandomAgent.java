@@ -1,26 +1,20 @@
-import java.util.List;
-
+import java.util.HashMap;
 
 public class RandomAgent extends Agent {
 	// An agent that bids randomly in auctions, regardless of his true value.
 	
-	public RandomAgent(int agent_idx, Valuation valuation) {
+	public RandomAgent(int agent_idx,  Valuation valuation) {
 		super(agent_idx, valuation);
 	}
 
 	@Override
-	public void roundResult(List<Result> results) {
-		// Random agent does not care about past results.
-	}
-
-	@Override
-	public double[] getBids() {
+	public HashMap<Integer, Double> getBids() {
 		// random agent always just bids a random number, irrespective of valuations.
-		double[] bid_list = new double[valuation.getNoValuations()];
+		HashMap<Integer, Double> bids = new HashMap<Integer, Double>(openAuctions.size());
 
-		for (int k = 0; k < valuation.getNoValuations(); k++) 
-			bid_list[k] = Math.random();
+		for (Integer a : openAuctions)
+			bids.put(a, Math.random());
 
-		return bid_list;
+		return bids;
 	}
 }

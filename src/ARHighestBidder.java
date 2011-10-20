@@ -5,7 +5,8 @@ import java.util.Vector;
 public class ARHighestBidder extends AllocationRule {
 	double reserve_price;
 	
-	ARHighestBidder(double reserve_price) {
+	ARHighestBidder(double reserve_price, double ask_price, double ask_epsilon) {
+		super(ask_price, ask_epsilon);
 		this.reserve_price = reserve_price;
 	}
 	
@@ -37,9 +38,10 @@ public class ARHighestBidder extends AllocationRule {
 		// Mark the highest random bid as winner, so long as it is at or above reserve price
 		if (winners.get(w).getBid() >= reserve_price) {
 			winners.get(w).setIsWinner(true);
+			ask_price = winners.get(w).getBid() + ask_epsilon;
 			return 1;
 		} else {
 			return 0;
 		}
-	}	
+	}
 }
