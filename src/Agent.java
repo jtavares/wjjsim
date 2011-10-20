@@ -1,6 +1,7 @@
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.HashSet;
-import java.util.List;
+import java.util.Set;
 import java.util.UUID;
 
 public abstract class Agent {
@@ -9,16 +10,19 @@ public abstract class Agent {
 	String agent_id;
 
 	ArrayList<Result> results;
+	HashSet<Integer> openAuctions;
 	
 	public Agent(int agent_idx, Valuation valuation) {
 		this.agent_idx = agent_idx;
 		this.valuation = valuation;
 
 		this.agent_id = UUID.randomUUID().toString();
-		this.results = new ArrayList<Result>();
+		this.results = new ArrayList<Result>(valuation.getNoValuations());
 
 		for (int i = 0; i<valuation.getNoValuations(); i++)
 			this.results.add(null);
+		
+		this.openAuctions = new HashSet<Integer>(valuation.getNoValuations());
 	}
 
 	public String getAgentID() {
@@ -27,10 +31,6 @@ public abstract class Agent {
 	
 	public int getAgentIdx() {
 		return agent_idx;
-	}
-	
-	public void auctionResult(Result result) {
-		results.set(result.getAuction().getAuctionIdx(), result);
 	}
 	
 	public double getTotalPayment() {
@@ -79,11 +79,45 @@ public abstract class Agent {
 			total_payment + ", profit=" + (total_valuation - total_payment) + "\n\tauctions won={" + str_won + "}\n";
 	}
 	
-	// For multi-round auctions, post the results from the previous round. For each item, 
-	// let the bidder know the current winner & winning bid. May be NULL for auction formats
-	// that do not include results information.
-	public abstract void roundResult(List<Result> results);
+	// alert the agent that he will need to bid in an auction
+	public void openAuction(int auction_idx) {
+		// open an auction, if the auction idx is valid.
+		if (auction_idx > 0 && auction_idx < valuation.getNoValuations())
+			openAuctions.add(auction_idx);
+	}
 	
-	// Retrieve bids for the current round.
-	public abstract double[] getBids();
+	// alert the agent that he will need to bid in all auctions (short-cut for simultaneous auctions)
+	public void openAllAuctions() {
+		openAuctions.clear(); // shouldn't need to clear, but, why not?
+		
+		for (int i = 0; i<valuation.getNoValuations(); i++)
+			openAuctions.add(i);
+	}
+	
+	// post a single auction result back to the agent
+	public void postResult(Result prev_result) {
+		results.set(prev_result.getAuction().getAuctionIdx(), prev_result);
+	}
+
+	// post a list of auction results back to the agent, one per currently open auction
+	public void postResults(Set<Result> prev_results) {
+		for (Result r : prev_results) {
+			results.set(r.getAuction().getAuctionIdx(), r);
+		}
+	}
+	
+	// ask agent to bid for each currently open auction (agent return bids for any subset of the currently open auctions,
+	// i.e., it may choose not to bid on any or all open auctions). The HashMap is from Auction# (integer) to Bid Price (double).
+	public abstract HashMap<Integer, Double> getBids();
+	
+	// alert the agent that he can no longer bid in an auction. The last result received for said
+	// auction is the auction result.
+	public void closeAuction(int auction_idx) {
+		openAuctions.remove(auction_idx);
+	}
+	
+	// alert the agent that he can no longer bid in any auction (short-cut for simultaneous auctions)
+	public void closeAllAuctions() {
+		openAuctions.clear();
+	}
 }

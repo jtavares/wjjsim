@@ -1,5 +1,4 @@
-import java.util.List;
-
+import java.util.HashMap;
 
 public class NaiveValueAgent extends Agent {
 	// An agent that bids an item's unit value; it does not consider effects of compliments or substitutes.
@@ -10,18 +9,14 @@ public class NaiveValueAgent extends Agent {
 	}
 
 	@Override
-	public void roundResult(List<Result> results) {
-		// TODO
-	}
+	public HashMap<Integer, Double> getBids() {
+		// Naive agent just always bids an item's independent value, as if that was the only
+		// value it owned.
+		HashMap<Integer, Double> bids = new HashMap<Integer, Double>(openAuctions.size());
 
-	@Override
-	public double[] getBids() {
-		// Naive agent just always bids an item's independent value.
-		double[] bid_list = new double[valuation.getNoValuations()];
+		for (Integer a : openAuctions)
+			bids.put(a, valuation.getValue(a));
 
-		for (int k = 0; k < valuation.getNoValuations(); k++) 
-			bid_list[k] = valuation.getValue(k);
-
-		return bid_list;
+		return bids;		
 	}
 }

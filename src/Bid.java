@@ -1,11 +1,11 @@
 public class Bid implements Comparable<Bid> {
 	protected double bid;
 	protected Agent agent;
-	protected Auction auction;
+	protected SBAuction auction;
 	protected boolean is_winner = false;
 	protected double payment;
 	
-	public Bid(Auction auction, Agent agent) {
+	public Bid(SBAuction auction, Agent agent) {
 		this.auction = auction;
 		this.agent = agent;
 	}
