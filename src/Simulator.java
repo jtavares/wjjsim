@@ -10,8 +10,9 @@ public class Simulator {
 		System.out.println("Welcome to WJJSIM.");
 		System.out.println("------------------");
 		System.out.println("");	
-		System.out.println("You are simulating a simultaneous sealed-bid auction.");
-		System.out.println("");
+
+		System.out.print("Enter 0 for single-shot, 1 for ascending> ");
+		int style = sc.nextInt();
 		
 		System.out.print("Enter 0 for all-pay, or 1 thru n for n-th price> ");	
 		int pay = sc.nextInt();
@@ -53,21 +54,33 @@ public class Simulator {
 				a = new RandomAgent(i, v);
 			else
 				a = new NaiveValueAgent(i, v);
-			
+		
 			agents.add(a);
 		}
 
 		// Create individual SB auctions
-		List<Auction> auctions = new ArrayList<Auction>(no_auctions);
+		List<SBAuction> auctions = new ArrayList<SBAuction>(no_auctions);
 		for (int i = 0; i<no_auctions; i++) {
+			// Choose starting ask price & epsilon. For single-shot auctions, ask_price should be 0,
+			// or otherwise it will function as a known reserve price (in addition to the hidden
+			// reserve_price), and ask_epsilon is essentially ignored.
+			
+			double ask_price = 0; // starting ask price.
+			double ask_epsilon = 0.1; // for ascending/descending auctions, the epsilon amount per round
+			
 			if (pay == 0)
-				auctions.add(new SBAllPayAuction(i, Math.random(), agents));
+				auctions.add(new SBAllPayAuction(i, Math.random(), ask_price, ask_epsilon, agents));
 			else
-				auctions.add(new SBNPAuction(i, Math.random(), agents, pay));
+				auctions.add(new SBNPAuction(i, Math.random(), ask_price, ask_epsilon, agents, pay));
 		}
-
-		SSBSimulation sim = new SSBSimulation(agents, auctions);
-		sim.play();
-		sim.report();
+	
+		if (style == 0) {
+			SimSSSimulation sim = new SimSSSimulation(agents, auctions);
+			sim.play();
+			sim.report();
+		} else if (style == 1) {
+			SimAscSimulation sim = new SimAscSimulation(agents, auctions);
+			sim.play();
+		}
 	}
 }
