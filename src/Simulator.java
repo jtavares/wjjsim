@@ -7,7 +7,7 @@ public class Simulator {
 	public static void main(String args[]) {	
 		Scanner sc = new Scanner(System.in);
 		
-		System.out.println("Welcome to WJJSIM.");
+		System.out.println("Welcome to WJJSIM!!!");
 		System.out.println("------------------");
 		System.out.println("");	
 		System.out.println("You are simulating a simultaneous sealed-bid auction.");
