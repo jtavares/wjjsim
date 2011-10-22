@@ -11,13 +11,16 @@ public class Simulator {
 		System.out.println("------------------");
 		System.out.println("");	
 
+		System.out.print("Enter 0 for simultaneous, 1 for sequential auction>");
+		int group=sc.nextInt();
+		
 		System.out.print("Enter 0 for single-shot, 1 for ascending> ");
 		int style = sc.nextInt();
 		
 		System.out.print("Enter 0 for all-pay, or 1 thru n for n-th price> ");	
 		int pay = sc.nextInt();
 		
-		System.out.print("Agent bid logic [0=random, 1=straight value]> ");
+		System.out.print("Agent bid logic [0=random, 1=straight value, 2=straightforward]> ");
 		int bid_logic = sc.nextInt();
 		
 		System.out.print("Agent valuation model [0=uniform additive, 1=substitutes, 2=complements]> ");
@@ -52,9 +55,14 @@ public class Simulator {
 			
 			if (bid_logic == 0)
 				a = new RandomAgent(i, v);
-			else
+			else if(bid_logic==1)
+			{
 				a = new NaiveValueAgent(i, v);
-		
+			}
+			else if (bid_logic==2)
+			{
+				a = new StraightforwardNaiveAgent(i,v); 
+			}
 			agents.add(a);
 		}
 
@@ -74,13 +82,20 @@ public class Simulator {
 				auctions.add(new SBNPAuction(i, Math.random(), ask_price, ask_epsilon, agents, pay));
 		}
 	
-		if (style == 0) {
+		if (style == 0&&group==0) {
+			//Simultaneous single-shot
 			SimSSSimulation sim = new SimSSSimulation(agents, auctions);
 			sim.play();
 			sim.report();
-		} else if (style == 1) {
+		} else if (style == 1&& group==0) {
+			//Simultaneous ascending 
 			SimAscSimulation sim = new SimAscSimulation(agents, auctions);
 			sim.play();
+		} else if (style==1 && group==1)
+		{
+			//Sequential ascending
+			SeqAscSimulation seq=new SeqAscSimulation(agents,auctions);
+			seq.play();
 		}
 	}
 }

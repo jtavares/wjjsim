@@ -30,6 +30,10 @@ public abstract class SBAuction {
 		bids = new ArrayList<Bid>(agents.size());
 		for (Agent a : agents)
 			this.bids.add(new Bid(this, a));
+		
+		// Send starting ask price to agents
+		for (Agent a : agents)
+			a.postResult(new Result(this, false, 0, ar.getAskPrice()));
 	}
 	
 	// submit a bid on behalf of an agent. returns true if bid was admitted, false otherwise.

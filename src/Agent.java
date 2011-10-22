@@ -11,6 +11,7 @@ public abstract class Agent {
 
 	ArrayList<Result> results;
 	HashSet<Integer> openAuctions;
+	HashSet<Integer> completedAuctions;
 	
 	public Agent(int agent_idx, Valuation valuation) {
 		this.agent_idx = agent_idx;
@@ -23,6 +24,7 @@ public abstract class Agent {
 			this.results.add(null);
 		
 		this.openAuctions = new HashSet<Integer>(valuation.getNoValuations());
+		this.completedAuctions = new HashSet<Integer>(valuation.getNoValuations());
 	}
 
 	public String getAgentID() {
@@ -82,14 +84,12 @@ public abstract class Agent {
 	// alert the agent that he will need to bid in an auction
 	public void openAuction(int auction_idx) {
 		// open an auction, if the auction idx is valid.
-		if (auction_idx > 0 && auction_idx < valuation.getNoValuations())
+		if (auction_idx >= 0 && auction_idx < valuation.getNoValuations())
 			openAuctions.add(auction_idx);
 	}
 	
 	// alert the agent that he will need to bid in all auctions (short-cut for simultaneous auctions)
-	public void openAllAuctions() {
-		openAuctions.clear(); // shouldn't need to clear, but, why not?
-		
+	public void openAllAuctions() {		
 		for (int i = 0; i<valuation.getNoValuations(); i++)
 			openAuctions.add(i);
 	}
@@ -114,10 +114,19 @@ public abstract class Agent {
 	// auction is the auction result.
 	public void closeAuction(int auction_idx) {
 		openAuctions.remove(auction_idx);
+		completedAuctions.add(auction_idx);
 	}
 	
 	// alert the agent that he can no longer bid in any auction (short-cut for simultaneous auctions)
 	public void closeAllAuctions() {
+		for (int i = 0; i<valuation.getNoValuations(); i++)
+			completedAuctions.add(i);
+		openAuctions.clear();
+	}
+
+	// alert the agent that he can no longer bid in the currently open auction
+	public void closeAllOpenAuctions() {
+		completedAuctions.addAll(openAuctions);
 		openAuctions.clear();
 	}
 }
