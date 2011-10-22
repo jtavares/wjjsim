@@ -96,6 +96,11 @@ public class Simulator {
 			//Sequential ascending
 			SeqAscSimulation seq=new SeqAscSimulation(agents,auctions);
 			seq.play();
+		}else if (style ==0 && group==1)
+		{
+			//Sequential single-shot
+			SeqSSSimulation seq= new SeqSSSimulation(agents,auctions);
+			seq.play();
 		}
 	}
 }
