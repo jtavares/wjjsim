@@ -11,17 +11,15 @@ public class SeqAscSimulation {
 		this.agents = agents;
 		this.auctions = auctions;
 	}
-	public void play()
-	{
-		for(int x=0;x<auctions.size();x++)
-		{
+	
+	public void play() {
+		// For each auction
+		for(int x=0; x<auctions.size(); x++) {
 			int rounds = 0;
 			
+			// Open the auction
 			for(int y=0;y<agents.size();y++)
-			{
 				agents.get(y).openAuction(x);
-				
-			}
 			
 			boolean activity;
 			do {
@@ -47,15 +45,13 @@ public class SeqAscSimulation {
 				rounds++;
 			} while (activity);
 			
-			
+			// Close the auction
 			for(int y=0;y<agents.size();y++)
-			{
 				agents.get(y).closeAuction(x);
-			}
 		}
 	}
-	public void report(int auction_idx)
-	{
+	
+	public void report(int auction_idx) {
 		// Report current auction results
 		auctions.get(auction_idx).report();
 		

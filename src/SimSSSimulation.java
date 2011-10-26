@@ -37,6 +37,10 @@ public class SimSSSimulation {
 		for (int i = 0; i<agents.size(); i++) {
 			agents.get(i).closeAllAuctions();
 		}
+		
+		
+		// Report results
+		report();
 	}
 	
 	public void report() {

@@ -12,27 +12,31 @@ public class SeqSSSimulation {
 	}
 	
 	public void play() {
+		// For each auction, one at a time
 		for (int j = 0; j<auctions.size(); j++) {
 			//open the next auction
 			for (int i = 0; i<agents.size(); i++) {
 				agents.get(i).openAuction(j);
 			}
 	
-			// Ask each agent for their bids
+			// Ask each agent for their bid
 			for (int i = 0; i<agents.size(); i++) {
 				HashMap<Integer, Double> i_bids = agents.get(i).getBids();	
-				auctions.get(j).submitBid(i, (i_bids.get(j)));
+				
+				if (i_bids.containsKey(j))
+					auctions.get(j).submitBid(i, (i_bids.get(j)));
 			}
 						
 			// Apply allocation & payment rules
 			auctions.get(j).solveAuction();
-			
-			report(j);
-			
+						
 			// Tell agents this auction is closed. 
 			for (int i = 0; i<agents.size(); i++) {
 				agents.get(i).closeAuction(j);
 			}
+			
+			// Report results for the current auction
+			report(j);
 		}
 	}
 			

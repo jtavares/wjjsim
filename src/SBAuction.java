@@ -55,14 +55,9 @@ public abstract class SBAuction {
 		total_revenue = pr.apply(bids);
 
 		// Post auction results to each agent.
-		double max_bid = 0;
 		for (int i = 0; i<bids.size(); i++) {
 			Result r = new Result(this, bids.get(i).getIsWinner(), bids.get(i).getPayment(), ar.getAskPrice());
-			agents.get(i).postResult(r);
-			
-			// find highest bid
-			if (bids.get(i).getBid() > max_bid)
-				max_bid = bids.get(i).getBid();
+			agents.get(i).postResult(r);			
 		}
 		
 		// determine if this auction was quiescent?
@@ -92,10 +87,12 @@ public abstract class SBAuction {
 		return bids;
 	}
 	
+	// the price we asked for in the previous round (before solveAuction() was called)
 	public double getLastAskPrice() {
 		return last_ask_price;
 	}
 	
+	// the price we asking in the current round
 	public double getCurrentAskPrice() {
 		return ar.getAskPrice();
 	}

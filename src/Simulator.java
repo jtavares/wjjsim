@@ -11,13 +11,17 @@ public class Simulator {
 		System.out.println("------------------");
 		System.out.println("");	
 
-		System.out.print("Enter 0 for simultaneous, 1 for sequential auction>");
-		int group=sc.nextInt();
+		System.out.print("Enter 0 for simultaneous, or 1 for sequential auction> ");
+		int group = sc.nextInt();
 		
-		System.out.print("Enter 0 for single-shot, 1 for ascending> ");
+		System.out.print("Enter 0 for single-shot, 1 for ascending, or 2 for descending> ");
 		int style = sc.nextInt();
 		
-		System.out.print("Enter 0 for all-pay, or 1 thru n for n-th price> ");	
+		if (style == 2)		
+			System.out.print("Enter 1 thru n for n-th price> ");
+		else
+			System.out.print("Enter 0 for all-pay, or 1 thru n for n-th price> ");
+				
 		int pay = sc.nextInt();
 		
 		System.out.print("Agent bid logic [0=random, 1=straight value, 2=straightforward]> ");
@@ -56,13 +60,10 @@ public class Simulator {
 			if (bid_logic == 0)
 				a = new RandomAgent(i, v);
 			else if(bid_logic==1)
-			{
 				a = new NaiveValueAgent(i, v);
-			}
 			else if (bid_logic==2)
-			{
 				a = new StraightforwardNaiveAgent(i,v); 
-			}
+
 			agents.add(a);
 		}
 
@@ -75,32 +76,48 @@ public class Simulator {
 			
 			double ask_price = 0; // starting ask price.
 			double ask_epsilon = 0.1; // for ascending/descending auctions, the epsilon amount per round
-			
-			if (pay == 0)
-				auctions.add(new SBAllPayAuction(i, Math.random(), ask_price, ask_epsilon, agents));
-			else
-				auctions.add(new SBNPAuction(i, Math.random(), ask_price, ask_epsilon, agents, pay));
+						
+			if (style == 2) {
+				// descending auctions
+				ask_price = Math.random();
+				
+				if (pay == 0)
+					System.out.println("Sorry, I don't know how do play an All Pay descending auction.");
+				else
+					auctions.add(new SBNPDescAuction(i, Math.random(), ask_price, ask_epsilon, agents, pay));
+			} else {
+				// single shot or ascending
+				if (pay == 0)
+					auctions.add(new SBAllPayAuction(i, Math.random(), ask_price, ask_epsilon, agents));
+				else
+					auctions.add(new SBNPAuction(i, Math.random(), ask_price, ask_epsilon, agents, pay));
+			}
 		}
 	
-		if (style == 0&&group==0) {
+		if (style == 0 && group == 0) {
 			//Simultaneous single-shot
-			SimSSSimulation sim = new SimSSSimulation(agents, auctions);
-			sim.play();
-			sim.report();
-		} else if (style == 1&& group==0) {
-			//Simultaneous ascending 
-			SimAscSimulation sim = new SimAscSimulation(agents, auctions);
-			sim.play();
-		} else if (style==1 && group==1)
-		{
-			//Sequential ascending
-			SeqAscSimulation seq=new SeqAscSimulation(agents,auctions);
-			seq.play();
-		}else if (style ==0 && group==1)
-		{
+			SimSSSimulation s = new SimSSSimulation(agents, auctions);
+			s.play();
+		} else if (style == 0 && group == 1) {
 			//Sequential single-shot
-			SeqSSSimulation seq= new SeqSSSimulation(agents,auctions);
-			seq.play();
+			SeqSSSimulation s = new SeqSSSimulation(agents,auctions);
+			s.play();
+		} else if (style == 1 && group == 0) {
+			//Simultaneous ascending 
+			SimAscSimulation s = new SimAscSimulation(agents, auctions);
+			s.play();
+		} else if (style == 1 && group == 1) {
+			//Sequential ascending
+			SeqAscSimulation s = new SeqAscSimulation(agents, auctions);
+			s.play();
+		} else if (style == 2 && group == 0) {
+			// Simultaneous descending
+			SimDescSimulation s = new SimDescSimulation(agents, auctions);
+			s.play();
+		} else if (style == 2 && group == 1) {
+			// Sequential descending
+			SeqDescSimulation s = new SeqDescSimulation(agents, auctions);
+			s.play();
 		}
 	}
 }
