@@ -1,3 +1,4 @@
+import java.util.HashSet;
 import java.util.Set;
 
 
@@ -16,7 +17,23 @@ public abstract class Valuation {
 	// Obtain our value if we were to obtain only item n.
 	public abstract double getValue(int n);
 	
+	// Obtain the number of items up for grabs
 	public int getNoValuations() {
 		return no_valuations;
+	}
+	
+	// Get the items as a set
+	public Set<Integer> getItems() {
+		Set<Integer> items = new HashSet<Integer>();
+		
+		for (int i = 0; i<no_valuations; i++)
+			items.add(i);
+		
+		return items;
+	}
+	
+	// Get the power set of all items, including the empty set.
+	public Set<Set<Integer>> getPowerSetOfitems() {
+		return PowerSet.generate(getItems());
 	}
 }	

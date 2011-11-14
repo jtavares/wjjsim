@@ -1,10 +1,12 @@
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Scanner;
+import java.util.Set;
 
 
 public class Simulator {
-	public static void main(String args[]) {	
+	public static void main(String args[]) {		
 		Scanner sc = new Scanner(System.in);
 		
 		System.out.println("Welcome to WJJSIM!!!");
@@ -24,10 +26,16 @@ public class Simulator {
 				
 		int pay = sc.nextInt();
 		
-		System.out.print("Agent bid logic [0=random, 1=straight value, 2=straightforward]> ");
+		System.out.print("Agent bid logic [0=random, 1=straight value, 2=straightforward-naive, 3=straightforward PP, 4=sunkaware PP]> ");
 		int bid_logic = sc.nextInt();
+
+		double k = 0.0;
+		if (bid_logic == 4) {
+			System.out.print("Enter [0, 1] k-value for sunk-aware bidder [0=fully sunk, 1=straight]> ");
+			k = sc.nextDouble();
+		}
 		
-		System.out.print("Agent valuation model [0=uniform additive, 1=substitutes, 2=complements]> ");
+		System.out.print("Agent valuation model [0=uniform additive, 1=substitutes, 2=complements, 3=scheduling]> ");
 		int valuation = sc.nextInt();
 
 		System.out.print("Please enter no. of agents> ");
@@ -52,6 +60,8 @@ public class Simulator {
 				v = new PerfectSubstitutesValuation(no_auctions);
 			else if (valuation == 2)
 				v = new PerfectComplementsValuation(no_auctions);
+			else if (valuation == 3)
+				v = new SchedulingValuation(no_auctions);
 			else
 				System.out.println("Invalid Valuation Model");
 			
@@ -59,11 +69,17 @@ public class Simulator {
 			
 			if (bid_logic == 0)
 				a = new RandomAgent(i, v);
-			else if(bid_logic==1)
+			else if(bid_logic == 1)
 				a = new NaiveValueAgent(i, v);
-			else if (bid_logic==2)
-				a = new StraightforwardNaiveAgent(i,v); 
-
+			else if (bid_logic == 2)
+				a = new StraightforwardNaiveAgent(i, v); 
+			else if (bid_logic == 3)
+				a = new StraightforwardPPAgent(i, v); 
+			else if (bid_logic == 4)				
+				a = new SunkawarePPAgent(i, v, k);
+			else
+				System.out.println("Invalid Bidder Logic");
+			
 			agents.add(a);
 		}
 
