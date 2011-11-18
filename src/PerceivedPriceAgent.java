@@ -1,5 +1,4 @@
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Set;
 
 // Implemented a "Perceived price" bidder, ala Simultaneous Ascending Auctions.
@@ -49,7 +48,8 @@ public abstract class PerceivedPriceAgent extends Agent {
 
 	// A subclass must implement rho, which returns perceived final prices for
 	// each item. The information state, bold-B, is available via private
-	// member variables: results, openAuctions, and closedAuctions 
+	// member variables: results, openAuctions, and closedAuctions (
+	// where the last two variables are irrelevant in SAAs).
 	protected abstract double[] rho();
 	
 	// Helper to get the cost of items in a basket, based on our perceived prices.
