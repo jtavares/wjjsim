@@ -17,7 +17,7 @@ public abstract class DiscreteDistribution {
 		this.precision = precision;
 	}
 	
-	// returns the probability that p is the final price, given that a bid of b has already been seen. Pr(p|b)
+	// returns the probability that p is the final price, given that a bid of b has already been observed. Pr(p|b)
 	public double getProb(double p, double b) {
 		return getProb(bin(p), b);
 	}
@@ -28,9 +28,9 @@ public abstract class DiscreteDistribution {
 		double price = 0;
 		
 		for (int i = bin(b); i<f.size(); i++)
-			price += getProb(i, b);
+			price += getProb(i, b) * val(i);
 		
-		return price /= (f.size() - bin(b));
+		return price;
 	}
 	
 	// returns the Kolmogorov-Smirnov (KS) statistic between this DiscreteDistribution
@@ -53,6 +53,16 @@ public abstract class DiscreteDistribution {
 		}
 		
 		return ks;
+	}
+	
+	// computes the CDF at the given price, given the that a bid of b has already been observed
+	public double getCDF(double p, double b) {
+		double F = 0; // CDF of F
+		
+		for (int i = 0; i<=bin(p); i++)
+			F += getProb(i, b);
+		
+		return F;
 	}
 	
 	// prints out some debugging information

@@ -17,6 +17,7 @@ public class Histogram {
 		this.denom = 0;
 	}
 	
+	// add a hit to the histogram
 	public void add(double p) {
 		int idx = (int) Math.round(p / precision);
 		
