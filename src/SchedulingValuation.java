@@ -53,4 +53,18 @@ public class SchedulingValuation extends Valuation {
 		return values.get(n-1);
 	}
 
+	@Override
+	public String getInfo() {
+		String v_t = "";
+		
+		for (Integer v : values) {
+			if (!v_t.equals(""))
+				v_t += ",";
+			
+			v_t += v;
+		}
+		
+		return "Scheduling: no_slots_req=" + no_slots_req + ", v(t)={" + v_t + "}";
+	}
+
 }

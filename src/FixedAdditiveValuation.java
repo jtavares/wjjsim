@@ -21,4 +21,9 @@ public class FixedAdditiveValuation extends AdditiveValuation {
 		for (int i = 0; i<no_valuations; i++)
 			this.values[i] = values[i];
 	}
+
+	@Override
+	public String getInfo() {
+		return "FixedAdditive";
+	}
 }

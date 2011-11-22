@@ -34,4 +34,9 @@ public class PerfectComplementsValuation extends Valuation {
 			return 0;
 	}
 
+	@Override
+	public String getInfo() {
+		return "PerfectComplements";
+	}
+
 }

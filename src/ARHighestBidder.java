@@ -36,6 +36,7 @@ public class ARHighestBidder extends AllocationRule {
 		int w  = (int)(winners.size() * Math.random());
 		
 		// Set ask price
+		cur_price = winners.get(w).getBid();
 		ask_price = winners.get(w).getBid() + ask_epsilon;
 		
 		// Mark the highest random bid as winner, so long as it is at or above reserve price

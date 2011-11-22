@@ -9,9 +9,9 @@ public class DiscreteDistributionStatic extends DiscreteDistribution {
 
 	// In a static price distribution, we do not take in account the the current price, b.
 	public double getProb(int idx, double b) {
-		if (idx >= F.size())
+		if (idx >= f.size())
 			return 0.0;
 		else
-			return F.get(idx);
+			return f.get(idx);
 	}
 }

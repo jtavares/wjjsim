@@ -36,4 +36,7 @@ public abstract class Valuation {
 	public Set<Set<Integer>> getPowerSetOfitems() {
 		return PowerSet.generate(getItems());
 	}
+	
+	// Get info about the valuation, if any
+	public abstract String getInfo();
 }	
