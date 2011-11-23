@@ -20,7 +20,7 @@ public class SeqSSSimulation3 extends SeqSSSimulation2{
 	
 			// Ask each agent for their bid
 			for (int i = 0; i<agents.size(); i++) {
-				HashMap<Integer, Double> i_bids = agents.get(i).getBids();	
+				HashMap<Integer, Double> i_bids = agents.get(i).getBids();
 				
 				if (i_bids.containsKey(j))
 					auctions.get(j).submitBid(i, (i_bids.get(j)));
