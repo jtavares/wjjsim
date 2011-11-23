@@ -1,11 +1,12 @@
 
 public class TestHistogramTwo {
-	public void main (String args[])
+	public static void main (String args[])
 	{
-		Histogram h = new Histogram(0.1);
+		Histogram h = new Histogram(1);
 		h.add(1.1);
-		h.add(2.2);
+		h.add(12.2);
 		h.add(3.3);
+		h.add(3.4);
 		
 		h.add(13.3);
 		

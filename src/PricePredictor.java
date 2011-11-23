@@ -2,7 +2,7 @@
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Scanner;
+
 
 //Work needs to be finished
 //1. check the precision 
