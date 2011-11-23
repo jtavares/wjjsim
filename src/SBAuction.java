@@ -33,7 +33,7 @@ public abstract class SBAuction {
 		
 		// Send starting ask price to agents
 		for (Agent a : agents)
-			a.postResult(new Result(this, false, 0, ar.getAskPrice()));
+			a.postResult(new Result(this, false, 0, ar.getAskPrice(), 0, ar.getAskEpsilon()));
 	}
 	
 	// submit a bid on behalf of an agent. returns true if bid was admitted, false otherwise.
@@ -56,7 +56,8 @@ public abstract class SBAuction {
 
 		// Post auction results to each agent.
 		for (int i = 0; i<bids.size(); i++) {
-			Result r = new Result(this, bids.get(i).getIsWinner(), bids.get(i).getPayment(), ar.getAskPrice());
+			Result r = new Result(this, bids.get(i).getIsWinner(), bids.get(i).getPayment(), ar.getAskPrice(),
+					ar.getCurPrice(), ar.getAskEpsilon());
 			agents.get(i).postResult(r);			
 		}
 		

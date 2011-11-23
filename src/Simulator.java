@@ -23,7 +23,8 @@ public class Simulator {
 				
 		int pay = sc.nextInt();
 		
-		System.out.print("Agent bid logic [0=random, 1=straight value, 2=straightforward-naive, 3=straightforward PP, 4=sunkaware PP]> ");
+		System.out.println("Agent bid logic Naive:       [0=random, 1=straight value, 2=straightforward-naive]");
+		System.out.print  ("                Wellman SAA: [3=straightforward PP, 4=sunkaware PP, 5=distribution price]> ");
 		int bid_logic = sc.nextInt();
 
 		double k = 0.0;
@@ -41,6 +42,21 @@ public class Simulator {
 		System.out.print("Please enter no. of goods> ");
 		int no_auctions = sc.nextInt();
 
+		// Create distributions
+		ArrayList<DiscreteDistribution> pd = new ArrayList<DiscreteDistribution>();
+		if (bid_logic == 5) {
+			System.out.println("WARNING: The same uniform (1,50) distribution set will be used across all agents.");
+			
+			Histogram h = new Histogram(1);
+
+			for (int j = 0; j<no_auctions; j++) {
+				for (int i = 0; i<128; i++)
+					h.add(Math.floor((Math.random() * 50)) + 1); // generates 1,50
+			
+				pd.add((DiscreteDistribution)new DiscreteDistributionWellman(h.getDiscreteDistribution(), 1));
+			}
+		}
+		
 		System.out.println("");
 		System.out.println("Running Simulation:");
 		System.out.println("-------------------");
@@ -74,6 +90,8 @@ public class Simulator {
 				a = new StraightforwardPPAgent(i, v); 
 			else if (bid_logic == 4)				
 				a = new SunkawarePPAgent(i, v, k);
+			else if (bid_logic == 5)
+				a = new DistributionPPAgent(i, v, pd);
 			else
 				System.out.println("Invalid Bidder Logic");
 			
@@ -88,7 +106,7 @@ public class Simulator {
 			// reserve_price), and ask_epsilon is essentially ignored.
 			
 			double ask_price = 0; // starting ask price.
-			double ask_epsilon = 0.1; // for ascending/descending auctions, the epsilon amount per round
+			double ask_epsilon = 1; // for ascending/descending auctions, the epsilon amount per round
 						
 			if (style == 2) {
 				// descending auctions
@@ -103,7 +121,7 @@ public class Simulator {
 				if (pay == 0)
 					auctions.add(new SBAllPayAuction(i, Math.random(), ask_price, ask_epsilon, agents));
 				else
-					auctions.add(new SBNPAuction(i, Math.random(), ask_price, ask_epsilon, agents, pay));
+					auctions.add(new SBNPAuction(i, 0/*Math.random()*/, ask_price, ask_epsilon, agents, pay));
 			}
 		}
 	

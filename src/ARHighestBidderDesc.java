@@ -44,7 +44,10 @@ public class ARHighestBidderDesc extends AllocationRule {
 	
 		// Choose a random high bidder
 		int w  = (int)(winners.size() * Math.random());
-				
+		
+		// TODO: not sure how to best define cur_price for desending auctions. this may need to be revised/relocated.
+		cur_price = winners.get(w).getBid();
+		
 		// Mark the highest random bid as winner, so long as it is at or above reserve price
 		if (winners.get(w).getBid() >= reserve_price) {
 			winners.get(w).setIsWinner(true);

@@ -20,4 +20,9 @@ public class PerfectSubstitutesValuation extends Valuation {
 	public double getValue(int n) {
 		return 1;
 	}
+
+	@Override
+	public String getInfo() {
+		return "PerfectSubstitutes";
+	}
 }

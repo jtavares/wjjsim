@@ -69,16 +69,18 @@ public abstract class Agent {
 				won.add(r.getAuction().getAuctionIdx());
 				
 				if (!str_won.equals(""))
-					str_won += ", ";
+					str_won += ",\n\t\t";
 				
 				str_won += r.getAuction().getAuctionIdx();
+				str_won += ": ";
+				str_won += r.information();
 			}
 		}
 		
-		double total_valuation = valuation.getValue(won);	
+		double total_valuation = valuation.getValue(won);
 		
 		return "AGENT " + agent_idx + "\n\tvaluation=" + total_valuation + ", payments=" +
-			total_payment + ", profit=" + (total_valuation - total_payment) + "\n\tauctions won={" + str_won + "}\n";
+			total_payment + ", profit=" + (total_valuation - total_payment) + ", info=" + valuation.getInfo() + "\n\tauctions won={" + str_won + "}\n";
 	}
 	
 	// alert the agent that he will need to bid in an auction

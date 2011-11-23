@@ -8,4 +8,9 @@ public class UniformAdditiveValuation extends AdditiveValuation {
 		for (int i = 0; i<no_valuations; i++)
 			values[i] = Math.random();
 	}
+
+	@Override
+	public String getInfo() {
+		return "UniformAdditive";
+	}
 }
