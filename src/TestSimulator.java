@@ -76,6 +76,8 @@ public class TestSimulator {
 				
 				double ask_price = 0; // starting ask price.
 				double ask_epsilon = 1; // for ascending/descending auctions, the epsilon amount per round
+				
+				//here the parameter style stands for Nth price
 				auctions.add(new SBNPAuction(i, 0/*Math.random()*/, ask_price, ask_epsilon, agents, style));
 				
 			}
