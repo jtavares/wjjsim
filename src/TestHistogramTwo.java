@@ -7,6 +7,8 @@ public class TestHistogramTwo {
 		h.add(2.2);
 		h.add(3.3);
 		
+		h.add(13.3);
+		
 		h.print();
 	}
 }
