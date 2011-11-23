@@ -6,7 +6,7 @@ import java.util.Scanner;
 public class TestSimulator {
 	
 
-	public void main (String args[])
+	public static void main (String args[])
 	{
 		Scanner sc = new Scanner(System.in);
 		System.out.println("Welcome to WJJSIM!!!");
@@ -82,10 +82,10 @@ public class TestSimulator {
 				
 			}
 			
+			PricePredictor predictor = new PricePredictor(agents,auctions,200,10,0.05);
 			
-			
-			SimAscSimulation s = new SimAscSimulation(agents, auctions);
-			s.play();
+			//SimAscSimulationTest s = new SimAscSimulationTest(agents, auctions);
+			//s.play();
 		}
 		
 	}
