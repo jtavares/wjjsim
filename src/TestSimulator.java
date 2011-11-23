@@ -3,17 +3,9 @@ import java.util.List;
 import java.util.Scanner;
 
 
-public class PricePredictor {
+public class TestSimulator {
 	
-	int agent_number;
-	int auction_number;
-	
-	public PricePredictor (int agent_number, int auction_number)
-	{
-		this.agent_number=agent_number;
-		this.auction_number=auction_number;
-	}
-	
+
 	public void main (String args[])
 	{
 		Scanner sc = new Scanner(System.in);
@@ -94,19 +86,6 @@ public class PricePredictor {
 			s.play();
 		}
 		
-		
-		
-	
-		
-		
-	}
-	public PricePredictor (PricePredictor pp, Agent strategy_agent)
-	{
-		//this.agent=strategy_agent;
 	}
 
-	public void process()
-	{
-		
-	}
 }
