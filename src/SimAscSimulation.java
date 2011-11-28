@@ -15,6 +15,10 @@ public class SimAscSimulation {
 	}
 	
 	public void play() {
+		play(false);
+	}
+	
+	public void play(boolean quiet) {
 		// Tell agents the auctions are open.
 		for (int i = 0; i<agents.size(); i++) {
 			agents.get(i).openAllAuctions();
@@ -40,9 +44,11 @@ public class SimAscSimulation {
 				a.solveAuction();
 			
 			// Report round results.
-			System.out.println("---ROUND " + rounds + "---");
-			System.out.println("");
-			report();
+			if (!quiet) {
+				System.out.println("---ROUND " + rounds + "---");
+				System.out.println("");
+				report();
+			}
 			
 			rounds++;
 		} while (activity);

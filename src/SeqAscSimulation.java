@@ -13,6 +13,10 @@ public class SeqAscSimulation {
 	}
 	
 	public void play() {
+		play(false);
+	}
+	
+	public void play(boolean quiet) {
 		// For each auction
 		for(int x=0; x<auctions.size(); x++) {
 			int rounds = 0;
@@ -38,9 +42,11 @@ public class SeqAscSimulation {
 				auctions.get(x).solveAuction();
 				
 				// Report round results.
-				System.out.println("--- AUCTION " + x + " --- ROUND " + rounds + " ---");
-				System.out.println("");
-				report(x);
+				if (!quiet) {
+					System.out.println("--- AUCTION " + x + " --- ROUND " + rounds + " ---");
+					System.out.println("");
+					report(x);
+				}
 				
 				rounds++;
 			} while (activity);
