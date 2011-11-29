@@ -46,5 +46,14 @@ public class TestHistogram {
 		System.out.println("");
 		System.out.println("WELLMAN DISTRIBUTION | $50:");
 		F.print(50);
+
+		System.out.println("");
+		System.out.println("WELLMAN DISTRIBUTION | $51:");
+		F.print(51);
+		
+		System.out.println("Expected Final Price:");
+		for (int i = 0; i<55; i++)
+			System.out.println("|$" + i + ": " + F.getExpectedFinalPrice(i));
+
 	}
 }

@@ -21,6 +21,11 @@ public class Histogram {
 	public void add(double p) {
 		int idx = (int) Math.round(p / precision);
 		
+		// Ignore values < 0 -- these make no sense for prices AND have special meaning
+		// in our framework (price of -1 says nobody has won).
+		if (p < 0)
+			return;
+		
 		while (idx >= h.size())
 			h.add(0);
 		

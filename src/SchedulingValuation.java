@@ -36,7 +36,7 @@ public class SchedulingValuation extends Valuation {
 		
 		// invariant: basket.size() >= 1
 		
-		// Otherwise; return v(t) where t = \lambda_j-th item in the basket
+		// Otherwise; return v(t) where t = \lambda_j-th item in the sorted basket
 		LinkedList<Integer> won = new LinkedList<Integer>();
 		won.addAll(basket);
 		Collections.sort(won);
@@ -50,7 +50,7 @@ public class SchedulingValuation extends Valuation {
 		if (1 < no_slots_req)
 			return 0;
 
-		return values.get(n-1);
+		return values.get(n);
 	}
 
 	@Override

@@ -97,6 +97,19 @@ public abstract class SBAuction {
 	public double getCurrentAskPrice() {
 		return ar.getAskPrice();
 	}
+
+	public double getWinnerPayment()
+	{
+		for(Bid b : bids)
+		{
+			if(b.is_winner)
+			{
+				return b.payment;
+			}
+		}
+		
+		return -1.00;
+	}
 	
 	public void report() {
 		System.out.println("AUCTION " + getAuctionIdx() +
