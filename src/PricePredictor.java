@@ -1,147 +1,160 @@
-
-
 import java.util.ArrayList;
-import java.util.List;
+import java.util.LinkedList;
 
-
-//Work needs to be finished
-//1. check the precision 
-//2 . contact James and J about how to write the communication with the agents about the new distribution
-//3. How to deal with the auctions each with different iteration numbers. For example Auction 0 has F0, F1 and end , 
-//But auctionS 1 has F0,F1,F3,F4,F5,F6,F7,F8,F9
-
-
-public class PricePredictor {
+public abstract class PricePredictor {
+	ArrayList<Agent> agents;
+	ArrayList<SBAuction> auctions;
+	int no_auctions;		// the number of goods/auctions
+	int no_per_iteration;	// no of samples to take per iteration
+	int max_iterations;		// max no of iterations to make
+	int avg_iterations;		// if max iterations is exceeded, then qw avg the last "avg_iterations" iterations
+	double ks_threshold;	// convergence exists when ks_threshold is met for all items simultaneously
+	double precision;		// precision for histograms/discrete distributions
 	
-	private List<Agent> agents;
-	private List<SBAuction> auctions;
-	int no_per_iteration;
-	int max_iteration;
-	double ks_threshold;
-	
-	public PricePredictor (List<Agent> agents, List<SBAuction> auctions,int no_per_iteration,int max_iteration,double ks_threshold)
-	{
-		this.agents=agents;
-		this.auctions=auctions;
-		this.no_per_iteration=no_per_iteration;
-		this.max_iteration=max_iteration;
-		this.ks_threshold=ks_threshold;
+	PricePredictor(int no_auctions, int no_per_iteration, int max_iterations,
+			int avg_iterations, double ks_threshold, double precision) {
+		this.no_auctions = no_auctions;
+		this.no_per_iteration = no_per_iteration;
+		this.max_iterations = max_iterations;
+		this.avg_iterations = avg_iterations;
+		this.ks_threshold = ks_threshold;
+		this.precision = precision;
 	}
 	
+	// A sub-class implements this to create a fresh set of agents & auctions when
+	// creating the initial auction (when we don't have a price prediction).
+	// The function should also play the auction to completion.
+	protected abstract void createAndPlayInitialAuction();
 	
+	// A sub-class implements this to create a fresh set of agents & auctions.
+	// The current price prediction is given as parameter pp. The function
+	// should also play the auction to completion.
+	protected abstract void createAndPlayPPAuction(ArrayList<DiscreteDistribution> pp);
 	
-	
-	public void process()
-	{
-		/*
-		  1. Initial Distribution
-		  2. singleIteration and send the distribution to the agents ?
-		  3. start another Iteration and compare the distribution to previous ones 
-		*/
+	// A sub-class implements this to convert a histogram to a discrete distribution of the
+	// type desired by the sub-class (such as DiscreteDistributionWellman). f has the precision
+	// specified by local variable "precision".
+	protected abstract DiscreteDistribution createDiscreteDistribution(ArrayList<Double> f);
+
+	// A user can call this function to predict prices.
+	public ArrayList<DiscreteDistribution> predict() {
+		// Keep a history in case we fail to converge.
+		LinkedList<ArrayList<DiscreteDistribution>> pp_history = new LinkedList<ArrayList<DiscreteDistribution>>();
 		
-		ArrayList<DiscreteDistributionWellman> distribution_list= initial();
+		// Create the initial price prediction
+		System.out.print("Initial: ");
+		ArrayList<DiscreteDistribution> pp_new = initial();
+		System.out.println("");
 		
-		
-		/*****************************************************************/
-		/**James and J , you could be free to edit the following codes . Here I want to inform the agents about the distribution**/
-	  //@@@	agents.setDistribution(distribution_list);
-		
-		/*****************************************************************/
-	
-		//The first real distribution from the agents
-		distribution_list=singleIteration();
-		
-		
-		int iteration_number=0;
-		ArrayList<DiscreteDistributionWellman> old_list;
-	
-		do
-		{
-		old_list=distribution_list;
-		/*****************************************************************/
-		/**James and J , you could be free to edit the following codes . Here I want to inform the agents about the distribution**/
-	  //@@@	agents.setDistribution(distribution_list);
-		
-		/*****************************************************************/
-		distribution_list=singleIteration();
-		iteration_number++;
-		}
-		while((iteration_number< max_iteration)&& !(compareDistribution(old_list,distribution_list)));
+		// Iterate up to "max_iterations" times.
+		for (int i = 0; i<max_iterations; i++) {
+			// Add latest price prediction to the history buffer.
+			pp_history.add(pp_new);
 			
-		
-	}
-	
-	public ArrayList<DiscreteDistributionWellman> initial ()
-	{
-		
-		ArrayList<DiscreteDistributionWellman> distribution_list=new ArrayList<DiscreteDistributionWellman>(auctions.size());
-		for (int i=0;i<auctions.size();i++)
-		{
-			//Convert from histogram to distribution
-			Histogram his= new Histogram(1);
-			for (int j=0;j<200;j++)
-				{
-				his.add(Math.floor((Math.random() * 50)) + 1);
-				}
+			// Trim the history by removing the oldest entry, if necessary
+			if (pp_history.size() > avg_iterations)
+				pp_history.removeFirst();
 			
-			ArrayList<Double> F=his.getDiscreteDistribution();
-			DiscreteDistributionWellman dd= new DiscreteDistributionWellman(F,1.00);
-			distribution_list.add(dd);
-		}
-		
-		
-		return distribution_list;
-		
-	}
-	
-	public ArrayList<DiscreteDistributionWellman> singleIteration()
-	{
-		ArrayList<Histogram> histogram_list=new ArrayList<Histogram>(auctions.size());
-		
-		for(int j=0;j<no_per_iteration;j++)
-		{
-			//each time when simultaneous ascending simulation start
-			SimAscSimulationTest s = new SimAscSimulationTest(agents, auctions);
-			s.play();
+			// Obtain a new price prediction, which is based on the last prediction
+			System.out.print("Iteration " + i + "/" + max_iterations + ": ");
+			pp_new = singleIteration(pp_history.getLast());
+			System.out.println("");
 			
-			for (int i =0;i<auctions.size();i++)
-			{
-				//record the final payment value to each item
-				double payment=s.getWinnerPayment(i);
-				//Every item adds a new payment record to its histogram
-				histogram_list.get(i).add(payment);
-			}
+			// Check for convergence
+			if (converged(pp_history.getLast(), pp_new))
+				return pp_new;
+		}
+
+		// Complete history by adding most recently generated price prediction.
+		pp_history.add(pp_new);
+
+		// We have failed to converge. Return the average of the last "avg_iterations"
+		ArrayList<DiscreteDistribution> pp_avg = new ArrayList<DiscreteDistribution>();
 		
+		// We need to do an index swap on pp_history to provide DiscreteDistribution.mean()
+		// with an ArrayList of distributions for the /same/ item.
+		for (int i = 0; i<auctions.size(); i++) {
+			ArrayList<DiscreteDistribution> pp_history_i = new ArrayList<DiscreteDistribution>();
+			
+			for (ArrayList<DiscreteDistribution> h : pp_history)
+				pp_history_i.add(h.get(i));
+			
+			pp_avg.add(createDiscreteDistribution(DiscreteDistribution.computeMean(pp_history_i)));
 		}
 		
-		//Start to calculate the distribution
-		ArrayList<DiscreteDistributionWellman> distribution_list=new ArrayList<DiscreteDistributionWellman>(auctions.size());
-		for (int i=0;i<auctions.size();i++)
-		{
-			//Convert from histogram to distribution
-			ArrayList<Double> F=histogram_list.get(i).getDiscreteDistribution();
-			DiscreteDistributionWellman dd= new DiscreteDistributionWellman(F,1.00);
-			distribution_list.add(dd);
+		return pp_avg;
+	}
+	
+	private ArrayList<DiscreteDistribution> initial() {
+		ArrayList<Histogram> histogram_list = new ArrayList<Histogram>(no_auctions);
+		
+		for (int i = 0; i<no_auctions; i++)
+			histogram_list.add(new Histogram(precision));
+		
+		for(int j = 0; j<no_per_iteration; j++) {
+			System.out.print(".");
+			
+			// Ask our sub-class to create a brand new set of agents & auctions and play the simulation
+			createAndPlayInitialAuction();
+			
+			// Every item adds a new payment record to its histogram
+			for (int i = 0; i < auctions.size(); i++) 
+				histogram_list.get(i).add(auctions.get(i).getWinnerPayment());
 		}
 		
-		return distribution_list;
+		// Start to calculate the distribution
+		ArrayList<DiscreteDistribution> distribution_list = new ArrayList<DiscreteDistribution>(auctions.size());
+
+		for (int i = 0; i<auctions.size(); i++)
+			distribution_list.add(createDiscreteDistribution(histogram_list.get(i).getDiscreteDistribution()));
 		
+		return distribution_list;		
 	}
 	
-	///not fnished yet ....../
-	public boolean compareDistribution(ArrayList<DiscreteDistributionWellman> dd, ArrayList<DiscreteDistributionWellman> ee)
-	{
-		return false;
+	private ArrayList<DiscreteDistribution> singleIteration(ArrayList<DiscreteDistribution> pp_old) {
+		ArrayList<Histogram> histogram_list = new ArrayList<Histogram>(no_auctions);
+		
+		for (int i = 0; i<no_auctions; i++)
+			histogram_list.add(new Histogram(precision));
+		
+		for(int j = 0; j<no_per_iteration; j++) {
+			System.out.print(".");
+
+			// Ask our sub-class to create a brand new set of agents & auctions and play the simulation
+			createAndPlayPPAuction(pp_old);
+			
+			// Every item adds a new payment record to its histogram
+			for (int i = 0; i < auctions.size(); i++) 
+				histogram_list.get(i).add(auctions.get(i).getWinnerPayment());
+		}
+		
+		// Start to calculate the distribution
+		ArrayList<DiscreteDistribution> distribution_list = new ArrayList<DiscreteDistribution>(auctions.size());
+
+		for (int i = 0; i<auctions.size(); i++)
+			distribution_list.add(createDiscreteDistribution(histogram_list.get(i).getDiscreteDistribution()));
+		
+		return distribution_list;		
 	}
 	
-	// 
-	public boolean compareIteration(DiscreteDistribution dd, DiscreteDistribution ee)
-	{
+	// Returns true if the two vectors of price distributions have converged to each other. We check the marginal
+	// ks-statistic on each in a pair-wise fashion, and return true if and only if all are under our stated threshold.
+	// Note that dd.size() must equal ee.size()
+	private boolean converged(ArrayList<DiscreteDistribution> dd, ArrayList<DiscreteDistribution> ee) {
+		boolean pass = true;
 		
-		if (dd.getKSStatistic(ee)<ks_threshold)
-		return true;
-		else
-			return false;
-	
+		System.out.print("\tKS: ");
+		
+		for (int i = 0; i<dd.size(); i++) {
+			double ks = dd.get(i).getKSStatistic(ee.get(i));
+			System.out.print(ks + ", ");
+
+			if (ks > ks_threshold)
+				pass = false;
+		}
+
+		System.out.println("\n");
+		
+		return pass;
 	}
 }

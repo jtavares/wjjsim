@@ -1,6 +1,5 @@
 import java.util.ArrayList;
 
-
 public abstract class DiscreteDistribution {
 	protected ArrayList<Double> f;
 	protected double precision;
@@ -26,6 +25,9 @@ public abstract class DiscreteDistribution {
 	// ala wellman section 4.2 page 12
 	public double getExpectedFinalPrice(double b) {
 		double price = 0;
+		
+		if (bin(b) >= f.size())
+			return b;
 		
 		for (int i = bin(b); i<f.size(); i++)
 			price += getProb(i, b) * val(i);
@@ -78,10 +80,48 @@ public abstract class DiscreteDistribution {
 	protected abstract double getProb(int idx, double b);
 
 	protected int bin(double p) {
-		return (int) Math.round(p / precision);
+		return bin(p, precision);
 	}
 	
 	protected double val(int idx) {
+		return val(idx, precision);
+	}
+	
+	public static int bin(double p, double precision) {
+		return (int) Math.round(p / precision);		
+	}
+
+	public static double val(int idx, double precision) {
 		return idx * precision;
+	}
+	
+	// Compute the pair-wise mean of a list of discrete distributions, and return the
+	// new distribution. Note that we return an ArrayList<Double>, which can be fed
+	// into the constructor of your favorite DiscreteDistrbution sub-class (such as Wellman
+	// or Static).
+	// Note that this function does not take into account the current information state,
+	// and is only relevant pre-auction.
+	public static ArrayList<Double> computeMean(ArrayList<DiscreteDistribution> list) {
+		// Find max i among the list members.
+		int max_i = 0;
+		for (DiscreteDistribution d : list) 
+			if (d.f.size() > max_i)
+				max_i = d.f.size();
+		
+		// Create average distribution
+		ArrayList<Double> dd_avg = new ArrayList<Double>(max_i);
+		
+		for (int i = 0; i<max_i; i++) {
+			dd_avg.add(0.0);
+			
+			double tmp = 0;
+			
+			for (DiscreteDistribution d : list)
+				tmp += i < d.f.size() ? d.f.get(i) : 0;
+			
+			dd_avg.set(i, tmp / list.size());
+		}
+		
+		return dd_avg;
 	}
 }

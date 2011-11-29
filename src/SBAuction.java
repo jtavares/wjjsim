@@ -107,6 +107,7 @@ public abstract class SBAuction {
 				return b.payment;
 			}
 		}
+		
 		return -1.00;
 	}
 	
