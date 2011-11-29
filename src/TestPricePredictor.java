@@ -24,7 +24,7 @@ public class TestPricePredictor {
 		System.out.println("");
 		
 		for (int i = 0; i<pp_data.size(); i++) {
-			System.out.println("ITEM " + i);
+			System.out.println("ITEM " + i + ", EFP: " + pp_data.get(i).getExpectedFinalPrice(b));
 			pp_data.get(i).print(0);
 			System.out.println("");
 		}
