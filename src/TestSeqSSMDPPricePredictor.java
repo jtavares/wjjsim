@@ -9,10 +9,10 @@ public class TestSeqSSMDPPricePredictor {
 		int no_auctions = 5;
 		int nth_price = 1;
 		double reserve_price = 0;
-		int no_per_iteration = 100;
-		int max_iterations = 5;
+		int no_per_iteration = 500;
+		int max_iterations = 20;
 		int avg_iterations = 10;
-		double ks_threshold = 0.10;
+		double ks_threshold = 0.01;
 		double precision = 1.0;
 	
 		PricePredictorSeqSSMDP pp = new PricePredictorSeqSSMDP(no_agents, no_auctions, nth_price, reserve_price,				

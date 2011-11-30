@@ -68,6 +68,9 @@ public abstract class PricePredictor {
 		// Complete history by adding most recently generated price prediction.
 		pp_history.add(pp_new);
 
+		if (pp_history.size() > avg_iterations)
+			pp_history.removeFirst();
+
 		// We have failed to converge. Return the average of the last "avg_iterations"
 		ArrayList<DiscreteDistribution> pp_avg = new ArrayList<DiscreteDistribution>();
 		
