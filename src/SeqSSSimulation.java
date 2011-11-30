@@ -10,8 +10,12 @@ public class SeqSSSimulation {
 		this.agents = agents;
 		this.auctions = auctions;
 	}
-	
+
 	public void play() {
+		play(false);
+	}
+	
+	public void play(boolean quiet) {
 		// For each auction, one at a time
 		for (int j = 0; j<auctions.size(); j++) {
 			//open the next auction
@@ -36,7 +40,8 @@ public class SeqSSSimulation {
 			}
 			
 			// Report results for the current auction
-			report(j);
+			if (quiet == false)
+				report(j);
 		}
 	}
 			
