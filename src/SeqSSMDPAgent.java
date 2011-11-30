@@ -17,9 +17,9 @@ ArrayList<DiscreteDistribution> pd;
 			computeMDP();
 			
 			// Print out the mapping \pi: state --> optimal bid
-			System.out.println("\nAgent " + agent_idx + ": I have done my MDP computation and here is my /pi mapping: ");
-			for (X_t key : pi.keySet())
-				System.out.println("pi(" + key.toString() + ") --> " + pi.get(key));
+			//System.out.println("\nAgent " + agent_idx + ": I have done my MDP computation and here is my /pi mapping: ");
+			//for (X_t key : pi.keySet())
+			//	System.out.println("pi(" + key.toString() + ") --> " + pi.get(key));
 	}
 		// Declare some variables. (X,t) is a state in MDP. Meaning: the set of goods obtained at step/auction t is X 
 		HashMap<X_t,Double> V = new HashMap<X_t,Double>();			// Value function V((X,t))
