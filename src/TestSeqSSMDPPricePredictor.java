@@ -10,7 +10,7 @@ public class TestSeqSSMDPPricePredictor {
 		int nth_price = 1;
 		double reserve_price = 0;
 		int no_per_iteration = 500;
-		int max_iterations = 20;
+		int max_iterations = 2;
 		int avg_iterations = 10;
 		double ks_threshold = 0.01;
 		double precision = 1.0;

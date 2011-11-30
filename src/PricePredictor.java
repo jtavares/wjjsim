@@ -1,5 +1,6 @@
 import java.util.ArrayList;
 import java.util.LinkedList;
+import java.io.*;
 
 public abstract class PricePredictor {
 	ArrayList<Agent> agents;
@@ -10,6 +11,8 @@ public abstract class PricePredictor {
 	int avg_iterations;		// if max iterations is exceeded, then qw avg the last "avg_iterations" iterations
 	double ks_threshold;	// convergence exists when ks_threshold is met for all items simultaneously
 	double precision;		// precision for histograms/discrete distributions
+	BufferedWriter bw;
+	StringBuilder contents;
 	
 	PricePredictor(int no_auctions, int no_per_iteration, int max_iterations,
 			int avg_iterations, double ks_threshold, double precision) {
@@ -19,6 +22,7 @@ public abstract class PricePredictor {
 		this.avg_iterations = avg_iterations;
 		this.ks_threshold = ks_threshold;
 		this.precision = precision;
+		contents= new StringBuilder("");
 	}
 	
 	// A sub-class implements this to create a fresh set of agents & auctions when
@@ -37,14 +41,65 @@ public abstract class PricePredictor {
 	protected abstract DiscreteDistribution createDiscreteDistribution(ArrayList<Double> f);
 
 	// A user can call this function to predict prices.
+	
+	public void printFile()
+	{
+		try {
+			bw=new BufferedWriter(new FileWriter(new File ("./src/1.txt")));
+		////	bw.write("HIHI");
+			bw.write(contents.toString());
+			bw.close();
+			}
+			catch(IOException ex)
+			{
+				ex.printStackTrace();
+			}
+	}
+	
+	public String getPrintTable(ArrayList<DiscreteDistribution> pp_list)
+	{
+		StringBuilder table=new StringBuilder("");
+		
+		int max_size = 0;
+		for (DiscreteDistribution p : pp_list)
+			if (p.f.size() > max_size)
+				max_size = p.f.size();
+		table.append("\n");
+		for (int j=0;j<pp_list.size();j++)
+		{
+		////table.append(","+j);
+		}
+		
+		//for every row
+		for(int i=0;i<max_size;i++)
+		{
+			//for every column
+			table.append("\n"+i);
+			for(int j=0;j<pp_list.size();j++)
+			{
+				DiscreteDistribution p=pp_list.get(j);
+				if(p.f.size()>i)
+				table.append(","+p.f.get(i));
+				else
+				table.append(","+"0.0");
+			}
+		}
+		return table.toString();
+	}
+	
+	
 	public ArrayList<DiscreteDistribution> predict() {
 		// Keep a history in case we fail to converge.
 		LinkedList<ArrayList<DiscreteDistribution>> pp_history = new LinkedList<ArrayList<DiscreteDistribution>>();
 		
 		// Create the initial price prediction
-		System.out.print("Initial: ");
+	////	System.out.print("Initial: ");
+	////	contents.append("Initial\n");
 		ArrayList<DiscreteDistribution> pp_new = initial();
 		System.out.println("");
+		contents.append("");
+		// output initial
+		contents.append(getPrintTable(pp_new));
 		
 		// Iterate up to "max_iterations" times.
 		for (int i = 0; i<max_iterations; i++) {
@@ -57,12 +112,18 @@ public abstract class PricePredictor {
 			
 			// Obtain a new price prediction, which is based on the last prediction
 			System.out.print("Iteration " + i + "/" + max_iterations + ": ");
+			////contents.append("Iteration " + i + "/" + max_iterations + ": ");
 			pp_new = singleIteration(pp_history.getLast());
 			System.out.println("");
+			contents.append("");
+			contents.append(getPrintTable(pp_new));
 			
 			// Check for convergence
-			if (converged(pp_history.getLast(), pp_new))
+			if (converged(pp_history.getLast(), pp_new)) {
+				contents.append("The pp_new is ");
+				printFile();
 				return pp_new;
+			}
 		}
 
 		// Complete history by adding most recently generated price prediction.
@@ -85,6 +146,8 @@ public abstract class PricePredictor {
 			pp_avg.add(createDiscreteDistribution(DiscreteDistribution.computeMean(pp_history_i)));
 		}
 		
+		////contents.append(getPrintTable(pp_avg));
+		printFile();
 		return pp_avg;
 	}
 	
@@ -148,16 +211,20 @@ public abstract class PricePredictor {
 		
 		System.out.print("\tKS: ");
 		
+		/////notice KS
+		contents.append("\n");
+		
 		for (int i = 0; i<dd.size(); i++) {
 			double ks = dd.get(i).getKSStatistic(ee.get(i));
 			System.out.print(ks + ", ");
+		////	contents.append(ks + ", ");
 
 			if (ks > ks_threshold)
 				pass = false;
 		}
 
 		System.out.println("\n");
-		
+		contents.append("\n");
 		return pass;
 	}
 }
