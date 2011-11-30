@@ -12,9 +12,14 @@ ArrayList<DiscreteDistribution> pd;
 	public SeqSSMDPAgent(int agent_idx, Valuation valuation, ArrayList<DiscreteDistribution> pd) {
 			super(agent_idx, valuation);
 			this.pd = pd;
+			computeMDP();
+			System.out.println("\nAgent " + agent_idx + ": I have done my MDP computation and here is my /pi mapping: ");
+			for (X_t key : pi.keySet())
+			{
+				System.out.println("pi(" + key.toString() + ") --> " + pi.get(key));
+			}
 	}
 		// Declare some variables. (X,t) is a state in MDP. Meaning: the set of goods obtained at step/auction t is X 
-
 		HashMap<X_t,Double> V = new HashMap<X_t,Double>();			// Value function V((X,t))
 		HashMap<X_t,Double> pi = new HashMap<X_t,Double>();			// optimal bidding function \pi((X,t))
 		ArrayList<Double> b = new ArrayList<Double>();
@@ -38,27 +43,32 @@ ArrayList<DiscreteDistribution> pd;
 		}
 		Set<Set<Integer>> genSet = PowerSet.generate(remaining_set);
 		
+		// System.out.println("\n\n MDP Step 1: .......");
+		
 		Iterator<Set<Integer>> iterator1 = genSet.iterator();
 		while (iterator1.hasNext()) {
 			X=iterator1.next();
 			x_t = new X_t(X,t);
 			V.put(x_t,valuation.getValue(X));
+			// System.out.println("V" + x_t.toString() + ") = " + valuation.getValue(X));
 		}
 		
 		// 2) ******************************** Recursively assign values for t = no_slots-1,...,1
 		
 		// 2.1) Iterate over auction t
-		for (t = no_slots; t>-1; t--){ 
-			
+		// System.out.println("\n\n MDP Step 2: .......");
+		
+		for (t = no_slots-1; t>-1; t--){ 
+		
 			// Generate ArrayList of bids we want to test. Specifically, we want to test b = {0,(p_1+p_2)/2,...,(p_{max-1}+p_max)/2,p_max+1}
 			DiscreteDistribution p = pd.get(t);
 			b.clear();
-			b.add((double) 0);
-			for (int i = 0; i < p.f.size() - 1; i++){
-				b.add(p.precision*(i+(i+1))/2);		// bid = (p_{i}+p_{i+1})/2
-			}
-			b.add(p.precision*(p.f.size()-1)+1);	// bid = p_{max}+1
+			b.add(0.0);
 			
+			for (int i = 0; i < p.f.size(); i++){
+				b.add(p.precision* ((double) (i+(i+1))/2 - 0.1) );		// bid = (p_{i}+p_{i+1})/2
+			}
+
 			remaining_set.remove(t);
 			genSet = PowerSet.generate(remaining_set);
 			Iterator<Set<Integer>> iterator2 = genSet.iterator();
@@ -66,24 +76,31 @@ ArrayList<DiscreteDistribution> pd;
 			// 2.2) Iterate over subsets of {0,...,t-1}
 			while (iterator2.hasNext()) {
 		    	X=iterator2.next();
+		    	x_t = new X_t(X,t);
+				Q.clear();
 		    	
+				// System.out.println("  >  For state " + x_t.toString() + ":");
+				
 		    	// Compute Q((X,t),b) for each bid. Iterative sum into variable temp
 		    	for (int i = 0; i < b.size(); i++){
-		    		bid = b.get(i);		// for the i^th bid
-		    		Q.clear();
-		    		temp=0;
+		    		temp = 0;
 		    		// Sum R((X,t),b) using "temp"
 		    		for (int j = 0; j < i; j++){
 		    			temp += -(j*p.precision)*p.f.get(j);	// add -p*f(p)
 		    		}
+		    		// System.out.print("R(" + x_t.toString() + "," + b.get(i) + ") = " + temp + ", and ");
 		    		
-		    		X_more = X;
+		    		X_more = new HashSet<Integer>();
+		    		X_more.addAll(X);
 		    		X_more.add(t);
 		    		x_t1 = new X_t(X_more,t+1);
 		    		x_t2 = new X_t(X,t+1);
-		    		temp += p.getCDF(bid, (double) 0) * V.get(x_t1) + (1-p.getCDF(bid, (double) 0)) * V.get(x_t2);
+		    		temp += p.getCDF(b.get(i), (double) 0) * V.get(x_t1) + (1-p.getCDF(b.get(i), (double) 0)) * V.get(x_t2);
 		    		Q.add(temp);
+		    		// System.out.println("Q(" + x_t.toString() + "," + b.get(i) + ") = " + temp);
 		    	}
+		    	
+		    	// Print out Q
 		    	
 		    	// Find \pi_((X,t)) = argmax_b Q((X,t),b)
 		    	max_value = Q.get(0);		// Value of largest Q((X,t),b)
@@ -95,12 +112,10 @@ ArrayList<DiscreteDistribution> pd;
 		    		}
 		    	}
 		    	
-		    	// Now we found the optimal bid for state (X,t). Assign values to \pi((X,t))
-	    		x_t = new X_t(X,t);
-		    	pi.put(x_t,b.get(max_idx));
-		    
-		    // Speaking to myself: I think this works. No need to use b = V((X \cup {x_{t+1}},t+1)) - V((X,t))... 
-		    
+		    	// Now we found the optimal bid for state (X,t). Assign values to \pi((X,t)) and V((X,t))
+		    	V.put(x_t,Q.get(max_idx));
+	    		pi.put(x_t,b.get(max_idx));
+	    		// System.out.println("V(" + x_t.toString() + ") = " + V.get(x_t) + ", and pi(" + x_t.toString() + ") = " + pi.get(x_t));
 		    }
 		}
 	}	
@@ -109,34 +124,27 @@ ArrayList<DiscreteDistribution> pd;
 	@Override
 	public HashMap<Integer, Double> getBids() {
 
+		HashMap<Integer, Double> bids = new HashMap<Integer, Double>();
+
 		// Figure out which auction is currently open? (There can be only one open auction at a time)
 		Iterator<Integer> iterator3 = openAuctions.iterator();
 		int current_auction = iterator3.next();
-		HashMap<Integer,Double> bids = new HashMap<Integer,Double>(current_auction);
 		
+		// Figure out what we have won in the past
 		Set<Integer> goods_won = new HashSet<Integer>();
-		X_t state;			// Current state (X,t)
-		if (current_auction == 0){
-			state = new X_t(goods_won,0);	// Current State ({},0)
-			bids.put(0, pi.get(state));			
-		}
-		else{
-			// Figure out which of past auctions we have won
-			for (int i = 0; i < current_auction; i++){
-				if (results.get(i).getIsWinner() == true){
-					goods_won.add(i);
-				}
+		for (int i = 0; i < current_auction; i++){
+			if (results.get(i).getIsWinner() == true){
+				goods_won.add(i);
 			}
-			state = new X_t(goods_won,current_auction);
-			bids.put(current_auction,pi.get(state));
 		}
+	
+		// HashMap<Integer,Double> bids = new HashMap<Integer,Double>(current_auction);
+		
+		X_t state = new X_t(goods_won,current_auction);			// Current state (X,t)
+		bids.put(current_auction, pi.get(state));
 		
 		return bids;
 	}
 
 }
-
-
-	
-	
 
