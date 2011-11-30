@@ -4,37 +4,30 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Set;
 
-//Implements agent for Sequential SPSB auction based on MDP. Details of MDP is included in J's write up. 
+// Backup of old SeqSSMDPAgent 
 
-public class SeqSSMDPAgent extends Agent {
+public class SeqSSMDPAgent2 extends Agent {
 ArrayList<DiscreteDistribution> pd;
 
-	public SeqSSMDPAgent(int agent_idx, Valuation valuation, ArrayList<DiscreteDistribution> pd) {
+	public SeqSSMDPAgent2(int agent_idx, Valuation valuation, ArrayList<DiscreteDistribution> pd) {
 			super(agent_idx, valuation);
 			this.pd = pd;
 			
 			// Do MDP calculation when initiating agent
 			computeMDP();
 			
-			/*
 			// Print out the mapping \pi: state --> optimal bid
-			System.out.println("\nAgent " + agent_idx + ": I have done my MDP computation and here is my /pi mapping: ");
-			for (X_t key : pi.keySet()) {
-				System.out.println("pi(" + key.toString() + ") --> " + pi.get(key));
-			}
-			for (X_t key : V.keySet()) {
-				System.out.println("V(" + key.toString() + ") --> " + V.get(key));
-			}
-			*/
+			//System.out.println("\nAgent " + agent_idx + ": I have done my MDP computation and here is my /pi mapping: ");
+			//for (X_t key : pi.keySet())
+			//	System.out.println("pi(" + key.toString() + ") --> " + pi.get(key));
 	}
 		// Declare some variables. (X,t) is a state in MDP. Meaning: the set of goods obtained at step/auction t is X 
 		HashMap<X_t,Double> V = new HashMap<X_t,Double>();			// Value function V((X,t))
 		HashMap<X_t,Double> pi = new HashMap<X_t,Double>();			// optimal bidding function \pi((X,t))
 		ArrayList<Double> b = new ArrayList<Double>();
 		ArrayList<Double> Q = new ArrayList<Double>();
-		ArrayList<Double> Rbase = new ArrayList<Double>();
 		int no_slots = valuation.getNoValuations(), t, max_idx;
-		double temp, temp2, bid, optimal_bid, max_value;
+		double R_base, temp, bid, optimal_bid, max_value;
 		X_t x_t,x_t1,x_t2;
 		Set<Integer> X = new HashSet<Integer>();
 		Set<Integer> X_more = new HashSet<Integer>();
@@ -61,9 +54,10 @@ ArrayList<DiscreteDistribution> pd;
 		
 		// 2) ******************************** Recursively assign values for t = no_slots-1,...,1
 		
-		// > Loop over auction t
+		// Iterate over auction t
 		for (t = no_slots-1; t>-1; t--){ 
 		
+			R_base = 0.0;	// baseline of R values
 			// Generate ArrayList of bids we want to test. Specifically, we want to test b = {0,p_1/2,(p_1+p_2)/2,...,(p_{max-1}+p_max)/2,p_max+1}
 			DiscreteDistribution p = pd.get(t);
 			b.clear();
@@ -71,40 +65,35 @@ ArrayList<DiscreteDistribution> pd;
 			for (int i = 0; i < p.f.size(); i++){
 				b.add(p.precision* ((double) (i+(i+1))/2 - 0.1) );		// bid = (p_{i}+p_{i+1})/2 - 0.1*precision
 			}
-			Rbase.clear();
 			
-	    	// Precompute Rbase for potential bids
-			for (int i = 0; i < b.size(); i++){
-	    		temp = 0;
-	    		// Compute R((X,t),b)
-	    		for (int j = 0; j < i; j++){
-	    			temp += -(j*p.precision)*p.f.get(j);	// add -p*f(p)
-	    		}
-	    		Rbase.add(temp);
-			}
-	    		
-	    		
-    		remaining_set.remove(t);
-    		genSet = PowerSet.generate(remaining_set);
-    		Iterator<Set<Integer>> iterator2 = genSet.iterator();
-    		// > Loop over subsets of goods X = {0,...,t-1}
-    		while (iterator2.hasNext()) {
-    			X=iterator2.next();
-    			x_t = new X_t(X,t);
-    			Q.clear();
-	    	
-    			// Compute Q((X,t),b) for each bid
-	    		X_more = new HashSet<Integer>();
-	    		X_more.addAll(X);
-	    		X_more.add(t);
-	    		x_t1 = new X_t(X_more,t+1);
-	    		x_t2 = new X_t(X,t+1);
-	    		// > Again loop over the bids
-	    		for (int i = 0; i < b.size(); i++) {
-	    			temp2 = Rbase.get(i)+p.getCDF(b.get(i), (double) 0) * V.get(x_t1) + (1-p.getCDF(b.get(i), (double) 0)) * V.get(x_t2);
+			// Iterate over subsets of goods {0,...,t-1}
+			remaining_set.remove(t);
+			genSet = PowerSet.generate(remaining_set);
+			Iterator<Set<Integer>> iterator2 = genSet.iterator();
+			while (iterator2.hasNext()) {
+		    	X=iterator2.next();
+		    	x_t = new X_t(X,t);
+				Q.clear();
+		    	
+		    	// Compute Q((X,t),b) for each bid. Q() is a sum, which is stored in variable temp
+		    	for (int i = 0; i < b.size(); i++){
+		    		temp = 0;
+		    		// Compute R((X,t),b)
+		    		for (int j = 0; j < i; j++){
+		    			temp += -(j*p.precision)*p.f.get(j);	// add -p*f(p)
+		    		}
+
+		    		// Compute the rest 2 components
+		    		X_more = new HashSet<Integer>();
+		    		X_more.addAll(X);
+		    		X_more.add(t);
+		    		x_t1 = new X_t(X_more,t+1);
+		    		x_t2 = new X_t(X,t+1);
+		    		temp += p.getCDF(b.get(i), (double) 0) * V.get(x_t1) + (1-p.getCDF(b.get(i), (double) 0)) * V.get(x_t2);
+
 		    		// Add this value to Q
-	    			Q.add(temp2);
-	    		}
+		    		Q.add(temp);
+		    	}
 		    	
 		    	// Find \pi_((X,t)) = argmax_b Q((X,t),b)
 		    	max_value = Q.get(0);		// Value of largest Q((X,t),b)
@@ -115,15 +104,13 @@ ArrayList<DiscreteDistribution> pd;
 		    			max_idx = i;
 		    		}
 		    	}
-
-	    		// Now we found the optimal bid for state (X,t). Assign values to \pi((X,t)) and V((X,t))
+		    	
+		    	// Now we found the optimal bid for state (X,t). Assign values to \pi((X,t)) and V((X,t))
 		    	V.put(x_t,Q.get(max_idx));
 	    		pi.put(x_t,b.get(max_idx));
-
-    		}
-		    	
+		    }
 		}
-	}
+	}	
 
 	// This getBids need to be called once in each SPSB auction
 	@Override

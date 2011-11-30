@@ -15,14 +15,8 @@ public class TestValuation extends Valuation {
 	public double getValue(Set<Integer> basket) {
 		if (basket.size() == 0)
 			return 0.0;
-		else if (basket.size() == 1){
-			if (basket.contains(0) == true)
-				return 50;
-			else
-				return 100;
-		}
 		else
-			return 150.0;
+			return 100.0;
 	}
 	
 	// Useless overrides... for formality purposes
