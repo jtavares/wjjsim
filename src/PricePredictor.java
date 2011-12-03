@@ -13,6 +13,8 @@ public abstract class PricePredictor {
 	double precision;		// precision for histograms/discrete distributions
 	BufferedWriter bw;
 	StringBuilder contents;
+	int max_size = 0;
+	boolean initial_uniform=true; //when true the initial price prediction will be set to flat uniform over[0,50]
 	
 	PricePredictor(int no_auctions, int no_per_iteration, int max_iterations,
 			int avg_iterations, double ks_threshold, double precision) {
@@ -42,11 +44,17 @@ public abstract class PricePredictor {
 
 	// A user can call this function to predict prices.
 	
-	public void printFile()
+	public void printFile(boolean uniform )
 	{
 		try {
-			bw=new BufferedWriter(new FileWriter(new File ("./src/1.txt")));
-		////	bw.write("HIHI");
+			if(uniform)
+			{
+				bw=new BufferedWriter(new FileWriter(new File ("./src/uniform.csv")));
+			}
+			else
+			{
+			bw=new BufferedWriter(new FileWriter(new File ("./src/initial.csv")));
+			}
 			bw.write(contents.toString());
 			bw.close();
 			}
@@ -56,34 +64,34 @@ public abstract class PricePredictor {
 			}
 	}
 	
-	public String getPrintTable(ArrayList<DiscreteDistribution> pp_list)
+	public String getPrintTable(ArrayList<DiscreteDistribution> pp_list, int iteration)
 	{
 		StringBuilder table=new StringBuilder("");
 		
-		int max_size = 0;
+		
+		//the size of pp_list is equal to the number of items
 		for (DiscreteDistribution p : pp_list)
 			if (p.f.size() > max_size)
 				max_size = p.f.size();
-		table.append("\n");
-		for (int j=0;j<pp_list.size();j++)
-		{
-		////table.append(","+j);
-		}
 		
-		//for every row
-		for(int i=0;i<max_size;i++)
+		//for each item k
+		for (int k=0;k<pp_list.size();k++)
 		{
-			//for every column
-			table.append("\n"+i);
-			for(int j=0;j<pp_list.size();j++)
+			table.append(iteration+",");
+			int item_number=k+1;
+			table.append(item_number);
+			// for each price 
+			for(int j=0;j<max_size;j++)
 			{
-				DiscreteDistribution p=pp_list.get(j);
-				if(p.f.size()>i)
-				table.append(","+p.f.get(i));
+				DiscreteDistribution p=pp_list.get(k);
+				if(p.f.size()>j)
+				table.append(","+p.f.get(j));
 				else
 				table.append(","+"0.0");
 			}
+			table.append("\n");
 		}
+		
 		return table.toString();
 	}
 	
@@ -92,14 +100,11 @@ public abstract class PricePredictor {
 		// Keep a history in case we fail to converge.
 		LinkedList<ArrayList<DiscreteDistribution>> pp_history = new LinkedList<ArrayList<DiscreteDistribution>>();
 		
-		// Create the initial price prediction
-	////	System.out.print("Initial: ");
-	////	contents.append("Initial\n");
 		ArrayList<DiscreteDistribution> pp_new = initial();
-		System.out.println("");
-		contents.append("");
+		
+		
 		// output initial
-		contents.append(getPrintTable(pp_new));
+		contents.append(getPrintTable(pp_new,0));
 		
 		// Iterate up to "max_iterations" times.
 		for (int i = 0; i<max_iterations; i++) {
@@ -115,13 +120,11 @@ public abstract class PricePredictor {
 			////contents.append("Iteration " + i + "/" + max_iterations + ": ");
 			pp_new = singleIteration(pp_history.getLast());
 			System.out.println("");
-			contents.append("");
-			contents.append(getPrintTable(pp_new));
+			contents.append( getPrintTable( pp_new,(i+1) ) );
 			
 			// Check for convergence
 			if (converged(pp_history.getLast(), pp_new)) {
-				contents.append("The pp_new is ");
-				printFile();
+				printFile(initial_uniform);
 				return pp_new;
 			}
 		}
@@ -146,12 +149,39 @@ public abstract class PricePredictor {
 			pp_avg.add(createDiscreteDistribution(DiscreteDistribution.computeMean(pp_history_i)));
 		}
 		
-		////contents.append(getPrintTable(pp_avg));
-		printFile();
+		
+		printFile(initial_uniform);
 		return pp_avg;
 	}
 	
+	private ArrayList<DiscreteDistribution> getUniformValuation()
+	{		
+		ArrayList<Histogram> histogram_list = new ArrayList<Histogram>(no_auctions);
+		
+		for (int i = 0; i<no_auctions; i++)
+			histogram_list.add(new Histogram(precision));
+		
+		for(int j = 0; j<no_per_iteration; j++) {
+			
+			   for (int i = 0; i < no_auctions; i++) 
+				histogram_list.get(i).add(Math.random()*50);
+		}
+		
+		// Start to calculate the distribution
+		ArrayList<DiscreteDistribution> distribution_list = new ArrayList<DiscreteDistribution>(no_auctions);
+
+		for (int i = 0; i<no_auctions; i++)
+			distribution_list.add(createDiscreteDistribution(histogram_list.get(i).getDiscreteDistribution()));
+		
+		return distribution_list;
+	}
+	
+	
 	private ArrayList<DiscreteDistribution> initial() {
+		
+		if(initial_uniform==true)
+			return getUniformValuation();
+		
 		ArrayList<Histogram> histogram_list = new ArrayList<Histogram>(no_auctions);
 		
 		for (int i = 0; i<no_auctions; i++)
@@ -211,20 +241,16 @@ public abstract class PricePredictor {
 		
 		System.out.print("\tKS: ");
 		
-		/////notice KS
-		contents.append("\n");
 		
 		for (int i = 0; i<dd.size(); i++) {
 			double ks = dd.get(i).getKSStatistic(ee.get(i));
 			System.out.print(ks + ", ");
-		////	contents.append(ks + ", ");
 
 			if (ks > ks_threshold)
 				pass = false;
 		}
 
 		System.out.println("\n");
-		contents.append("\n");
 		return pass;
 	}
 }
