@@ -13,6 +13,7 @@ public abstract class PricePredictor {
 	double precision;		// precision for histograms/discrete distributions
 	BufferedWriter bw;
 	StringBuilder contents;
+
 	int max_size = 0;
 	boolean initial_uniform=true; //when true the initial price prediction will be set to flat uniform over[0,50]
 	
@@ -43,7 +44,6 @@ public abstract class PricePredictor {
 	protected abstract DiscreteDistribution createDiscreteDistribution(ArrayList<Double> f);
 
 	// A user can call this function to predict prices.
-	
 	public void printFile(boolean uniform )
 	{
 		try {
@@ -99,10 +99,12 @@ public abstract class PricePredictor {
 	public ArrayList<DiscreteDistribution> predict() {
 		// Keep a history in case we fail to converge.
 		LinkedList<ArrayList<DiscreteDistribution>> pp_history = new LinkedList<ArrayList<DiscreteDistribution>>();
-		
+
+		// Create the initial price prediction
+		////	System.out.print("Initial: ");
+		////	contents.append("Initial\n");
 		ArrayList<DiscreteDistribution> pp_new = initial();
-		
-		
+				
 		// output initial
 		contents.append(getPrintTable(pp_new,0));
 		
@@ -120,6 +122,7 @@ public abstract class PricePredictor {
 			////contents.append("Iteration " + i + "/" + max_iterations + ": ");
 			pp_new = singleIteration(pp_history.getLast());
 			System.out.println("");
+
 			contents.append( getPrintTable( pp_new,(i+1) ) );
 			
 			// Check for convergence
@@ -149,8 +152,9 @@ public abstract class PricePredictor {
 			pp_avg.add(createDiscreteDistribution(DiscreteDistribution.computeMean(pp_history_i)));
 		}
 		
-		
 		printFile(initial_uniform);
+
+		////contents.append(getPrintTable(pp_avg));
 		return pp_avg;
 	}
 	
@@ -240,11 +244,11 @@ public abstract class PricePredictor {
 		boolean pass = true;
 		
 		System.out.print("\tKS: ");
-		
-		
+				
 		for (int i = 0; i<dd.size(); i++) {
 			double ks = dd.get(i).getKSStatistic(ee.get(i));
 			System.out.print(ks + ", ");
+		////	contents.append(ks + ", ");
 
 			if (ks > ks_threshold)
 				pass = false;

@@ -19,7 +19,6 @@ public class TestMDP {
 		h1.add(2);
 		h2.add(1);
 		h2.add(2);
-		h2.add(3);
 		
 		pd.add((DiscreteDistribution) new DiscreteDistributionWellman(h1.getDiscreteDistribution(), 1));
 		pd.add((DiscreteDistribution) new DiscreteDistributionWellman(h2.getDiscreteDistribution(), 1));
