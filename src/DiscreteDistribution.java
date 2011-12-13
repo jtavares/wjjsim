@@ -1,6 +1,11 @@
+import java.io.Serializable;
 import java.util.ArrayList;
 
-public abstract class DiscreteDistribution {
+public abstract class DiscreteDistribution implements Serializable {
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = -1785569628131713076L;
 	protected ArrayList<Double> f;
 	protected double precision;
 	
