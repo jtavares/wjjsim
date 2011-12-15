@@ -1,3 +1,4 @@
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
@@ -7,11 +8,19 @@ public class SimAscSimulation {
 
 	private List<Agent> agents;
 	private List<SBAuction> auctions;
+	private ArrayList<Double> PrOfBids;
 	private int rounds = 0;
+		
+	public SimAscSimulation(List<Agent> agents, List<SBAuction> auctions, ArrayList<Double> PrOfBids) {
+		this.agents = agents;
+		this.auctions = auctions;
+		this.PrOfBids = PrOfBids;
+	}
 	
 	public SimAscSimulation(List<Agent> agents, List<SBAuction> auctions) {
 		this.agents = agents;
 		this.auctions = auctions;
+		this.PrOfBids = null;
 	}
 	
 	public void play() {
@@ -24,9 +33,14 @@ public class SimAscSimulation {
 			agents.get(i).openAllAuctions();
 		}
 		
-		boolean activity;
+		int bids;
 		do {
-			activity = false;
+			bids = 0;
+			
+			if (PrOfBids != null) {
+				if (rounds == PrOfBids.size())
+					PrOfBids.add(0.0);
+			}
 			
 			// Ask agents for their for their bids for current round 
 			for (int i = 0; i<agents.size(); i++) {
@@ -35,8 +49,13 @@ public class SimAscSimulation {
 			
 				// i: agent idx, j: auction idx.
 				
+				boolean agent_bid = false;
 				for (Integer j : i_bids.keySet())
-					activity |= auctions.get(j).submitBid(i, i_bids.get(j)); // bids below ask will get rejected.
+					if (auctions.get(j).submitBid(i, i_bids.get(j))) // bids below ask will get rejected
+						agent_bid = true;
+				
+				if (agent_bid)
+					bids++;
 			}
 			
 			// Apply allocation & payment rules to each separate auction
@@ -50,15 +69,19 @@ public class SimAscSimulation {
 				report();
 			}
 			
+			if (PrOfBids != null) {
+				PrOfBids.set(rounds, PrOfBids.get(rounds) + bids);
+			}
+			
 			rounds++;
-		} while (activity);
+		} while (bids > 0);
 		
 		// Tell agents the auctions are closed.
 		for (int i = 0; i<agents.size(); i++) {
 			agents.get(i).closeAllAuctions();
 		}
 	}
-	
+		
 	public void report() {
 		// Report current auction results
 		for (SBAuction a : auctions) {

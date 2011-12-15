@@ -1,3 +1,5 @@
+import java.util.ArrayList;
+
 // Implements a Sunk Aware percevied price star bidder
 
 // There is currently no difference between this agent and a SunkawarePPAgent,
@@ -5,6 +7,11 @@
 
 public class SunkawarePPStarAgent extends PerceivedPriceStarAgent {
 	double k;
+	
+	public SunkawarePPStarAgent(int agent_idx, Valuation valuation, ArrayList<Double> PrOfBids, double k) {
+		super(agent_idx, valuation, PrOfBids);
+		this.k = k;
+	}
 	
 	// where k determines the amount of sunk-awareness. k=0 is fully sunk-aware, k=1 is
 	// equiv. to straightforward bidding
