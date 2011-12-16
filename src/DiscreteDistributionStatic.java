@@ -3,6 +3,11 @@ import java.util.ArrayList;
 // a class that represents the price distribution for a single item.
 
 public class DiscreteDistributionStatic extends DiscreteDistribution {
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 4896473932186549776L;
+
 	public DiscreteDistributionStatic(ArrayList<Double> F, double precision) {
 		super(F, precision);
 	}

@@ -15,7 +15,7 @@ public class GenerateSAASchedPricePredictions extends Thread {
 	double ask_price = 1;
 	double ask_epsilon = 1;
 	int no_per_iteration = 5000;	// no. of auctions to run in each iteration. the more, the better the histogram
-	int max_iterations = 20;
+	int max_iterations = 10;
 	int avg_iterations = 2;
 	double ks_threshold = 0.10;
 	double precision = 1.0;
