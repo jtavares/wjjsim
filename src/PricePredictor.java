@@ -43,8 +43,8 @@ public abstract class PricePredictor {
 	// specified by local variable "precision".
 	protected abstract DiscreteDistribution createDiscreteDistribution(ArrayList<Double> f);
 
-	// A user can call this function to predict prices.
-	public void printFile(boolean uniform )
+	// A user can call this function to print all contents in "contents" 
+	public void printFile(boolean uniform)
 	{
 		try {
 			if(uniform)
@@ -64,10 +64,22 @@ public abstract class PricePredictor {
 			}
 	}
 	
+	// A user can call this function to print all contents in "contents" 
+		public void printFile2(String filename)
+		{
+			try {	bw=new BufferedWriter(new FileWriter(new File (filename)));
+					bw.write(contents.toString());
+					bw.close();
+			} catch(IOException ex)
+			{
+				ex.printStackTrace();
+			}
+		}
+		
+	
 	public String getPrintTable(ArrayList<DiscreteDistribution> pp_list, int iteration)
 	{
-		StringBuilder table=new StringBuilder("");
-		
+		StringBuilder table=new StringBuilder("");	
 		
 		//the size of pp_list is equal to the number of items
 		for (DiscreteDistribution p : pp_list)
@@ -101,10 +113,10 @@ public abstract class PricePredictor {
 		LinkedList<ArrayList<DiscreteDistribution>> pp_history = new LinkedList<ArrayList<DiscreteDistribution>>();
 
 		// Create the initial price prediction
-		////	System.out.print("Initial: ");
-		////	contents.append("Initial\n");
+		//	System.out.print("Initial: ");
 		ArrayList<DiscreteDistribution> pp_new = initial();
-				
+//		ArrayList<DiscreteDistribution> pp_new = getUniformValuation();
+
 		// output initial
 		contents.append(getPrintTable(pp_new,0));
 		
@@ -123,7 +135,7 @@ public abstract class PricePredictor {
 			pp_new = singleIteration(pp_history.getLast());
 			System.out.println("");
 
-			contents.append( getPrintTable( pp_new,(i+1) ) );
+			contents.append(getPrintTable(pp_new,(i+1)));
 			
 			// Check for convergence
 			if (converged(pp_history.getLast(), pp_new)) {
@@ -158,6 +170,84 @@ public abstract class PricePredictor {
 		return pp_avg;
 	}
 	
+	// Slight modification to "predict": in each price update step, P(t+1) = (P(t)+new_histogram)/2
+	public ArrayList<DiscreteDistribution> predict_smoothed(ArrayList<Double> weight) {
+		
+		// Keep a history in case we fail to converge.
+		LinkedList<ArrayList<DiscreteDistribution>> pp_history = new LinkedList<ArrayList<DiscreteDistribution>>();
+
+		// Create the initial price prediction
+//		ArrayList<DiscreteDistribution> pp_new = initial();
+		ArrayList<DiscreteDistribution> pp_new = getUniformValuation();
+		ArrayList<DiscreteDistribution> pp_temp = new ArrayList<DiscreteDistribution>();	// to store the temporary histograms
+
+		// output initial
+		contents.append(getPrintTable(pp_new,0));
+		
+		// Iterate up to "max_iterations" times.
+		for (int i = 0; i<max_iterations; i++) {
+			// Add latest price prediction to the history buffer.
+			pp_history.add(pp_new);
+//			System.out.println(" iteration " + i + "pp_new = " + pp_new.get(0).getCDF((double) 20,(double) 0) + "," + pp_new.get(1).getCDF((double) 20,(double) 0) + "," + pp_new.get(2).getCDF((double) 20,(double) 0) + "," + pp_new.get(3).getCDF((double) 20,(double) 0) + "," + pp_new.get(4).getCDF((double) 20,(double) 0));
+			
+			// Trim the history by removing the oldest entry, if necessary
+			if (pp_history.size() > avg_iterations)
+				pp_history.removeFirst();
+			
+			System.out.println("Iteration " + i + "/" + max_iterations + ": ");
+
+			// Obtain a new price prediction, which is based on the last prediction
+			pp_temp = singleIteration(pp_new);
+			
+			System.out.println();
+//			System.out.println(" iteration " + i + "pp_temp = " + pp_temp.get(0).getCDF((double) 20,(double) 0) + "," + pp_temp.get(1).getCDF((double) 20,(double) 0) + "," + pp_temp.get(2).getCDF((double) 20,(double) 0) + "," + pp_temp.get(3).getCDF((double) 20,(double) 0) + "," + pp_temp.get(4).getCDF((double) 20,(double) 0));
+
+			pp_new = new ArrayList<DiscreteDistribution>();
+			// Average over last price prediction and the present histogram to get the next price prediction
+			for (int k = 0; k<auctions.size(); k++) {
+				ArrayList<DiscreteDistribution> pp_to_ave_k = new ArrayList<DiscreteDistribution>();
+
+				pp_to_ave_k.add(pp_history.getLast().get(k));
+				pp_to_ave_k.add(pp_temp.get(k));
+				pp_new.add(createDiscreteDistribution(DiscreteDistribution.computeWeightedMean(pp_to_ave_k,weight)));
+			}
+//			System.out.println(" iteration " + i + "pp_new = " + pp_new.get(0).getCDF((double) 20,(double) 0) + "," + pp_new.get(1).getCDF((double) 20,(double) 0) + "," + pp_new.get(2).getCDF((double) 20,(double) 0) + "," + pp_new.get(3).getCDF((double) 20,(double) 0) + "," + pp_new.get(4).getCDF((double) 20,(double) 0));			
+			contents.append( getPrintTable( pp_new,(i+1) ) );
+			
+			// Check for convergence
+			if (converged(pp_history.getLast(), pp_new)) {
+				printFile(initial_uniform);
+				return pp_new;
+			}
+		}
+
+		// Complete history by adding most recently generated price prediction.
+		pp_history.add(pp_new);
+
+		if (pp_history.size() > avg_iterations)
+			pp_history.removeFirst();
+
+		// We have failed to converge. Return the average of the last "avg_iterations"
+		ArrayList<DiscreteDistribution> pp_avg = new ArrayList<DiscreteDistribution>();
+		
+		// We need to do an index swap on pp_history to provide DiscreteDistribution.mean()
+		// with an ArrayList of distributions for the /same/ item.
+		for (int i = 0; i<auctions.size(); i++) {
+			ArrayList<DiscreteDistribution> pp_history_i = new ArrayList<DiscreteDistribution>();
+			
+			for (ArrayList<DiscreteDistribution> h : pp_history)
+				pp_history_i.add(h.get(i));
+			
+			pp_avg.add(createDiscreteDistribution(DiscreteDistribution.computeMean(pp_history_i)));
+		}
+		
+		printFile(initial_uniform);
+
+		////contents.append(getPrintTable(pp_avg));
+		return pp_avg;
+	}
+
+	
 	private ArrayList<DiscreteDistribution> getUniformValuation()
 	{		
 		ArrayList<Histogram> histogram_list = new ArrayList<Histogram>(no_auctions);
@@ -180,7 +270,6 @@ public abstract class PricePredictor {
 		return distribution_list;
 	}
 	
-	
 	private ArrayList<DiscreteDistribution> initial() {
 		
 		if(initial_uniform==true)
@@ -192,7 +281,7 @@ public abstract class PricePredictor {
 			histogram_list.add(new Histogram(precision));
 		
 		for(int j = 0; j<no_per_iteration; j++) {
-			System.out.print(".");
+			// System.out.print(".");
 			
 			// Ask our sub-class to create a brand new set of agents & auctions and play the simulation
 			createAndPlayInitialAuction();

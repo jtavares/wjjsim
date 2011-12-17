@@ -39,4 +39,16 @@ public abstract class Valuation {
 	
 	// Get info about the valuation, if any
 	public abstract String getInfo();
+	
+	// Print the valuation function
+	public void print() {
+		for (Set<Integer> basket : this.getPowerSetOfitems()) {
+			System.out.print("{");
+			
+			for (Integer i : basket)
+				System.out.print(" " + i);
+			
+			System.out.println("} ==> $" + this.getValue(basket));
+		}
+	}
 }	
