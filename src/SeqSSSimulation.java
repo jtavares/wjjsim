@@ -44,7 +44,9 @@ public class SeqSSSimulation {
 				report(j);
 		}
 	}
-			
+	
+	
+	
 	public void report(int auction_idx) {
 		// Report results per auction
 		auctions.get(auction_idx).report();

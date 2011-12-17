@@ -129,4 +129,37 @@ public abstract class DiscreteDistribution implements Serializable {
 		
 		return dd_avg;
 	}
+
+	// Similar to computeMean, but computes a weighted mean of a list of distributions. 
+	public static ArrayList<Double> computeWeightedMean(ArrayList<DiscreteDistribution> list, ArrayList<Double> weight) {
+		//	"list" and "weight" must be of same length; "weight" must sum to 1. 
+		
+		// Find max i among the list members.
+		int max_i = 0;
+		for (DiscreteDistribution d : list) 
+			if (d.f.size() > max_i)
+				max_i = d.f.size();
+		
+		// Create average distribution
+		ArrayList<Double> dd_avg = new ArrayList<Double>(max_i);
+		
+		for (int i = 0; i<max_i; i++) {
+			dd_avg.add(0.0);
+			
+			double tmp = 0;
+			int tally = 0;
+			for (DiscreteDistribution d : list) {
+				if (d.f.size() > i)
+					tmp += d.f.get(i)*weight.get(tally);
+				tally += 1;
+			
+			dd_avg.set(i, tmp);
+			}
+		}
+		
+		return dd_avg;
+	}
 }
+
+	
+

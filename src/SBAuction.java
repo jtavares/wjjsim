@@ -108,7 +108,7 @@ public abstract class SBAuction {
 			}
 		}
 		
-		return -1.00;
+		return 0.00;
 	}
 	
 	public void report() {

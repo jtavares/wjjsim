@@ -16,16 +16,31 @@ ArrayList<DiscreteDistribution> pd;
 			// Do MDP calculation when initiating agent
 			computeMDP();
 			
-			/*
-			// Print out the mapping \pi: state --> optimal bid
-			System.out.println("\nAgent " + agent_idx + ": I have done my MDP computation and here is my /pi mapping: ");
-			for (X_t key : pi.keySet()) {
-				System.out.println("pi(" + key.toString() + ") --> " + pi.get(key));
+
+/*
+			// Print out input price prediction
+			if (valuation.getValue(0) > 0) {
+				for (int i = 0; i < pd.size(); i++) {
+					System.out.println("Slot " + i + ":" );
+					pd.get(i).print(0.0);
+				}
+
+				System.out.println("\nAgent " + agent_idx + " Valuation:");
+				valuation.print();
+
+				// Print out the mapping \pi: state --> optimal bid
+				System.out.println("\nAgent " + agent_idx + ": I have done my MDP computation and here is my /pi mapping: ");
+				for (X_t key : pi.keySet()) {
+					System.out.println("pi(" + key.toString() + ") --> " + pi.get(key));
+				}
+
+				for (X_t key : V.keySet()) {
+					System.out.println("V(" + key.toString() + ") --> " + V.get(key));
+				}
+
 			}
-			for (X_t key : V.keySet()) {
-				System.out.println("V(" + key.toString() + ") --> " + V.get(key));
-			}
-			*/
+*/			
+
 	}
 		// Declare some variables. (X,t) is a state in MDP. Meaning: the set of goods obtained at step/auction t is X 
 		HashMap<X_t,Double> V = new HashMap<X_t,Double>();			// Value function V((X,t))
@@ -146,7 +161,12 @@ ArrayList<DiscreteDistribution> pd;
 		
 		HashMap<Integer, Double> bids = new HashMap<Integer, Double>();
 		bids.put(current_auction, pi.get(state));
-		
+/*		
+		if (valuation.getValue(0) > 0 && current_auction == 0 && bids.get(0) == 0) {
+			System.out.println("agent_idx: " + agent_idx + ", current_auction: " + current_auction + ", bid=" + bids.get(current_auction));
+			System.exit(1);
+		}
+*/
 		return bids;
 	}
 
