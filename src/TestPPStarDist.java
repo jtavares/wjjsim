@@ -20,7 +20,7 @@ public class TestPPStarDist {
 	double ask_epsilon = 1; 	// initial ask epsilon
 	int nth_pay = 1;			// first price auction
 	
-	int no_iterations = 10000;
+	int no_iterations = 100000;
 	
 	// *** VARIABLES ***
 	int no_pp_agents;
