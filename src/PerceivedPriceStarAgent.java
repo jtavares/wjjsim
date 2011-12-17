@@ -86,7 +86,8 @@ public abstract class PerceivedPriceStarAgent extends PerceivedPriceAgent {
 		
 		// 90% chance of someone else bidding
 		// ==> bid 2x10% of the time
-		if (lowest_ask != -1 && (r >= prob-(1-prob)))
+		if (lowest_ask != -1 && (r >= prob-(1-prob))) // WINNING ALGO.
+		//if (lowest_ask != -1 && (r <= 2*(1-prob)))
 			bids.put(lowest_ask, results.get(lowest_ask).getAskPrice());
 		
 		round++;

@@ -14,10 +14,10 @@ public class TestPPStarPrOfBids {
 	double ask_epsilon = 1; 	// initial ask epsilon
 	int nth_pay = 1;			// first price auction
 	
-	int no_samples = 10000;		// no of samples (auctions) to run to generate PrOfBids.
-	int no_steps = 25;			// no of bid probability generation steps to perform
+	int no_samples = 1000;		// no of samples (auctions) to run to generate PrOfBids.
+	int no_steps = 5;			// no of bid probability generation steps to perform
 	
-	int no_iterations = 100000;	// no of iterations to generate average payoff results.
+	int no_iterations = 10000;	// no of iterations to generate average payoff results.
 	
 	// *** VARIABLES ***
 	int no_pp_agents;

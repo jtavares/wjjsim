@@ -20,7 +20,7 @@ public class TestPPStarDist {
 	double ask_epsilon = 1; 	// initial ask epsilon
 	int nth_pay = 1;			// first price auction
 	
-	int no_iterations = 100000;
+	int no_iterations = 10000;
 	
 	// *** VARIABLES ***
 	int no_pp_agents;
@@ -92,6 +92,7 @@ public class TestPPStarDist {
 		// Create PP agents first
 		for (int i = 0; i<no_pp_agents; i++)
 			agents.add(new DistributionPPAgent(i, new SchedulingValuation(no_goods), welldist_pp.get((int)(Math.random() * welldist_pp.size()))));
+			//agents.add(new SunkawarePPStarAgent(i, new SchedulingValuation(no_goods), 0));
 		
 		// Create PPStar agents next.
 		for (int i = 0; i<no_ppstar_agents; i++)
