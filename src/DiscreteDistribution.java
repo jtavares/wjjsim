@@ -99,6 +99,65 @@ public abstract class DiscreteDistribution implements Serializable {
 	public static double val(int idx, double precision) {
 		return idx * precision;
 	}
+		
+	protected static DiscreteDistribution createDiscreteDistribution(ArrayList<Double> f, double precision) {
+		return new DiscreteDistributionWellman(f, precision);
+	}
+	
+	// Shifts the old distribution by amount "shift"
+	public static DiscreteDistribution shiftDistribution(DiscreteDistribution old_dist, int shift){
+		
+		ArrayList<Double> new_f = new ArrayList<Double>();
+
+		int length = old_dist.f.size();
+		
+		// fill in the holes of old distribution (length harded coded... to be changed later)
+		if (length < 51){			
+			for (int i=0; i<51-length; i++){
+				old_dist.f.add(0.0);
+			}
+		}
+		
+		// Shift up
+		if (shift > 0) {
+			// set zeros
+			for (int i = 0; i < shift; i++) {
+				new_f.add(0.0);
+			}
+			// directly copy some with a shift
+			for (int i = shift; i < old_dist.f.size() - 1; i++){
+				new_f.add(old_dist.f.get(i-shift));
+			}
+			// at the end, do a cumulation...  
+			double final_mass = 0.0;
+			for (int j = old_dist.f.size()- shift; j < old_dist.f.size(); j++){
+				final_mass += old_dist.f.get(j);
+			}
+			new_f.add(final_mass);
+		}
+		// Shift down
+		else {
+			// do a cumulation
+			double final_mass = 0.0;
+			for (int j = 0; j < -shift+1; j++){
+				final_mass += old_dist.f.get(j);
+			}
+			new_f.add(final_mass);
+			
+			// directly copy with a shift
+			for (int i = 1 ; i < old_dist.f.size()+shift; i++) {
+				new_f.add(old_dist.f.get(i-shift));
+			}
+			
+			// fill in zeros
+			for (int i = old_dist.f.size()+shift; i < 51; i++){
+				new_f.add(0.0);
+			}			
+		}
+		DiscreteDistribution new_dist = createDiscreteDistribution(new_f, old_dist.precision);
+		
+		return new_dist;
+	}
 	
 	// Compute the pair-wise mean of a list of discrete distributions, and return the
 	// new distribution. Note that we return an ArrayList<Double>, which can be fed

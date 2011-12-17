@@ -7,15 +7,15 @@ import java.util.Set;
 //Implements agent for Sequential SPSB auction based on MDP. Details of MDP is included in J's write up. 
 
 public class SeqSSMDPAgent extends Agent {
-ArrayList<DiscreteDistribution> pd;
+
+	ArrayList<DiscreteDistribution> pd;
 
 	public SeqSSMDPAgent(int agent_idx, Valuation valuation, ArrayList<DiscreteDistribution> pd) {
 			super(agent_idx, valuation);
 			this.pd = pd;
 			
 			// Do MDP calculation when initiating agent
-			computeMDP();
-			
+			computeMDP(pd);
 
 /*
 			// Print out input price prediction
@@ -55,7 +55,7 @@ ArrayList<DiscreteDistribution> pd;
 		Set<Integer> X_more = new HashSet<Integer>();
 		
 	// Ask the agent to computes optimal bidding policy \pi((X,t)) using MDP. The two steps correspond to the two steps in write-up	
-	public void computeMDP(){	
+	public void computeMDP(ArrayList<DiscreteDistribution> pd){	
 		
 		// 1) ******************************** Initialize V values for t = no_slots; corresponding to after all auctions are closed. 
 		t = no_slots;
@@ -76,9 +76,13 @@ ArrayList<DiscreteDistribution> pd;
 		
 		// 2) ******************************** Recursively assign values for t = no_slots-1,...,1
 		
+		// System.out.println("t = " + t);
+		
 		// > Loop over auction t
 		for (t = no_slots-1; t>-1; t--){ 
-		
+			
+			// System.out.println("Agent " + agent_idx + ", t = " + t);
+			
 			// Generate ArrayList of bids we want to test. Specifically, we want to test b = {0,p_1/2,(p_1+p_2)/2,...,(p_{max-1}+p_max)/2,p_max+1}
 			DiscreteDistribution p = pd.get(t);
 			b.clear();

@@ -67,8 +67,7 @@ public abstract class PricePredictor {
 	// A user can call this function to print all contents in "contents" 
 		public void printFile2(String filename)
 		{
-			try {
-					bw=new BufferedWriter(new FileWriter(new File (filename)));
+			try {	bw=new BufferedWriter(new FileWriter(new File (filename)));
 					bw.write(contents.toString());
 					bw.close();
 			} catch(IOException ex)
@@ -114,8 +113,7 @@ public abstract class PricePredictor {
 		LinkedList<ArrayList<DiscreteDistribution>> pp_history = new LinkedList<ArrayList<DiscreteDistribution>>();
 
 		// Create the initial price prediction
-		////	System.out.print("Initial: ");
-		////	contents.append("Initial\n");
+		//	System.out.print("Initial: ");
 		ArrayList<DiscreteDistribution> pp_new = initial();
 //		ArrayList<DiscreteDistribution> pp_new = getUniformValuation();
 
@@ -272,7 +270,6 @@ public abstract class PricePredictor {
 		return distribution_list;
 	}
 	
-	
 	private ArrayList<DiscreteDistribution> initial() {
 		
 		if(initial_uniform==true)
@@ -284,7 +281,7 @@ public abstract class PricePredictor {
 			histogram_list.add(new Histogram(precision));
 		
 		for(int j = 0; j<no_per_iteration; j++) {
-			System.out.print(".");
+			// System.out.print(".");
 			
 			// Ask our sub-class to create a brand new set of agents & auctions and play the simulation
 			createAndPlayInitialAuction();
