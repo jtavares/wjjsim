@@ -1,5 +1,5 @@
 /*
- * Author: TJ Goff
+2 * Author: TJ Goff
  * 
  * This is a server for a simultaneous series of second price auctions.
  * Clients connect to the server through Simultaneous2ndPriceAuctionServerThread 
@@ -56,7 +56,7 @@ public class Simultaneous2ndPriceAuctionServer {
         int portNum = 7; //the luckiest port there is!
         //Try reading in the IP and socket number from the text file...
         try {
-            BufferedReader in = new BufferedReader(new FileReader("IP_and_Port.txt"));
+            BufferedReader in = new BufferedReader(new FileReader("./src/IP_and_Port.txt"));
             //two lines in this file.  First is hostName/IP address, and second is socket number of host 
             String hName = in.readLine();//use the hostname found above and skip this one
             portNum = Integer.valueOf( in.readLine() );	

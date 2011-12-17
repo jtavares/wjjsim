@@ -43,7 +43,7 @@ public class Sequential2ndPriceAuctionClient {
         int socketNum = 7; //the luckiest socket
         //Try reading in the IP and socket number from the text file...
         try {
-            in = new BufferedReader(new FileReader("IP_and_Port.txt"));
+            in = new BufferedReader(new FileReader("./src/IP_and_Port.txt"));
             //two lines in this file.  First is hostName/IP address, and second is socket number of host 
             hostName = in.readLine();
             socketNum = Integer.valueOf( in.readLine() );	

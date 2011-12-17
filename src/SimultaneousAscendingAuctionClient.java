@@ -44,7 +44,7 @@ public class SimultaneousAscendingAuctionClient {
         String hostName = "192.168.40.1";//IP of host (may be local IP)
         int socketNum = 7; //the luckiest socket
         try {
-            in = new BufferedReader(new FileReader("IP_and_Port.txt"));
+            in = new BufferedReader(new FileReader("./src/IP_and_Port.txt"));
             //two lines in this file.  First is hostName/IP address, and second is socket number of host 
             hostName = in.readLine();
             socketNum = Integer.valueOf( in.readLine() );	
