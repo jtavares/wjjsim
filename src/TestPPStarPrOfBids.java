@@ -15,7 +15,9 @@ public class TestPPStarPrOfBids {
 	int nth_pay = 1;			// first price auction
 	
 	int no_samples = 10000;		// no of samples (auctions) to run to generate PrOfBids.
-	int no_iterations = 10000;	// no of iterations to generate average payoff results.
+	int no_steps = 25;			// no of bid probability generation steps to perform
+	
+	int no_iterations = 100000;	// no of iterations to generate average payoff results.
 	
 	// *** VARIABLES ***
 	int no_pp_agents;
@@ -34,56 +36,61 @@ public class TestPPStarPrOfBids {
 	double avg_ppstar_loss = 0;
 	double avg_ppstar_gain = 0;
 
-	ArrayList<Double> PrOfBids_LR;		// PrOfBids from the last round. This is fed to bid predictor for this round.
-	ArrayList<Double> PrOfBids_Pred1;	// PrOfBids predicted for this round.
-	ArrayList<Double> PrOfBids_Pred2;	// PrOfBids predicted for this round.
-	ArrayList<Double> PrOfBids_Pred3;	// PrOfBids predicted for this round.
+	ArrayList<ArrayList<Double>> PrOfBids_Pred;	// PrOfBids predicted for this round.
 	ArrayList<Double> PrOfBids_Act;		// PrOfBids that actually occurred this round.
 
 	public TestPPStarPrOfBids(int no_pp_agents, int no_ppstar_agents, ArrayList<Double> PrOfBids_LR) {
 		this.no_pp_agents = no_pp_agents;
 		this.no_ppstar_agents = no_ppstar_agents;
 		this.no_agents = no_pp_agents + no_ppstar_agents;
-		this.PrOfBids_Pred1 = new ArrayList<Double>(256);
-		this.PrOfBids_Pred2 = new ArrayList<Double>(256);
-		this.PrOfBids_Pred3 = new ArrayList<Double>(256);
+		this.PrOfBids_Pred = new ArrayList<ArrayList<Double>>(no_steps);
 		this.PrOfBids_Act = new ArrayList<Double>(256);
-		this.PrOfBids_LR = PrOfBids_LR;
+		
+		// Make a deep copy of PrOfBids_LR.
+		ArrayList<Double> last = new ArrayList<Double>(256);
+		
+		for (double d : PrOfBids_LR)
+			last.add(d);
+		
+		this.PrOfBids_Pred.add(last);
 	}
 	
 	public ArrayList<Double> run() {		
 		// Generate bid probabilities for this mix.
-		System.out.print("Generating PrOfBids...  ");
+		System.out.print("Generating PrOfBids...");
 
-		// Prediction 1
-		for (int i = 0; i<no_samples; i++)
-			generate_pr_iteration(PrOfBids_LR, PrOfBids_Pred1);
+		for (int i = 1; i<no_steps; i++) {
+			ArrayList<Double> prev = PrOfBids_Pred.get(i-1);
+			ArrayList<Double> next = new ArrayList<Double>(256);
+		
+			for (int j = 0; j<no_samples; j++)
+				generate_pr_iteration(prev, next);
+						
+			for (int j = 0; j<next.size(); j++) {
+				double a = next.get(j) / (no_samples*no_agents); 	// probability this step
+				double b = j < prev.size() ? prev.get(j) : 0;		// probability last step
 				
-		for (int i = 0; i<PrOfBids_Pred1.size(); i++)
-			PrOfBids_Pred1.set(i, PrOfBids_Pred1.get(i) / (no_samples*no_agents));	
-
-		// Prediction 2
-		for (int i = 0; i<no_samples; i++)
-			generate_pr_iteration(PrOfBids_Pred1, PrOfBids_Pred2);
-		
-		for (int i = 0; i<PrOfBids_Pred2.size(); i++)
-			PrOfBids_Pred2.set(i, PrOfBids_Pred2.get(i) / (no_samples*no_agents));	
-
-		// Prediction 3
-		for (int i = 0; i<no_samples; i++)
-			generate_pr_iteration(PrOfBids_Pred2, PrOfBids_Pred3);
-		
-		for (int i = 0; i<PrOfBids_Pred3.size(); i++)
-			PrOfBids_Pred3.set(i, PrOfBids_Pred3.get(i) / (no_samples*no_agents));	
+				// make probability this round the average of this step and last step
+				next.set(j, (a+b)/2);				
+			}
+			
+			PrOfBids_Pred.add(next);
+			
+			System.out.print(".");
+		}	
 
 		System.out.println("Done.");
 		
 		// Play game
 		System.out.println("Playing game with bid predictions....");
 		
+		ArrayList<Double> last = PrOfBids_Pred.get(no_steps-1);
 		for (int i = 0; i<no_iterations; i++)
-			iteration(PrOfBids_Pred3, PrOfBids_Act);
-		
+			iteration(last, PrOfBids_Act);
+
+		for (int i = 0; i<PrOfBids_Act.size(); i++)
+			PrOfBids_Act.set(i, PrOfBids_Act.get(i) / (no_iterations*no_agents));	
+
 		System.out.println("Done.");
 
 		avg_pp_profit /= no_iterations*no_pp_agents;
@@ -118,19 +125,30 @@ public class TestPPStarPrOfBids {
 
 		System.out.println("");
 		
-		System.out.println("Round,PrOfBids Predicted 1,PrOfBids Predicted 2,PrOfBids Predicted 3,PrOfBids Actual");
+		System.out.print("Round,");
 		
-		for (int i = 0; i<PrOfBids_Act.size(); i++)
-			PrOfBids_Act.set(i, PrOfBids_Act.get(i) / (no_samples*no_agents));	
-			
-		int max_rounds = Math.max(PrOfBids_Pred3.size(), Math.max(PrOfBids_Pred2.size(), Math.max(PrOfBids_Pred1.size(), PrOfBids_Act.size())));
+		for (int j = 0; j<no_steps; j++)
+			System.out.print("Pred" + j + ",");
+		
+		System.out.println("Actual");
+				
+		int max_rounds = PrOfBids_Pred.get(0).size();
+		for (int i = 1; i<no_steps; i++)
+			if (PrOfBids_Pred.get(i).size() > max_rounds)
+				max_rounds = PrOfBids_Pred.get(i).size();
+		
 		for (int i = 0; i<max_rounds; i++) {
-			double pred1 = i < PrOfBids_Pred1.size() ? PrOfBids_Pred1.get(i) : 0;
-			double pred2 = i < PrOfBids_Pred2.size() ? PrOfBids_Pred2.get(i) : 0;
-			double pred3 = i < PrOfBids_Pred3.size() ? PrOfBids_Pred3.get(i) : 0;
-			double act = i < PrOfBids_Act.size() ? PrOfBids_Act.get(i) : 0;
+			System.out.print(i + ",");
+
+			for (int j = 0; j<no_steps; j++) {
+				double pred = i < PrOfBids_Pred.get(j).size() ? PrOfBids_Pred.get(j).get(i) : 0;
 			
-			System.out.println(i + "," + pred1 + "," + pred2 + "," + pred3 + "," + act);
+				System.out.print(pred + ",");
+			}
+			
+			double act = i < PrOfBids_Act.size() ? PrOfBids_Act.get(i) : 0;
+
+			System.out.println(act + "");
 		}
 
 		System.out.println("");

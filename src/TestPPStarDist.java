@@ -1,3 +1,9 @@
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.FilenameFilter;
+import java.io.IOException;
+import java.io.ObjectInputStream;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -6,15 +12,15 @@ import java.util.List;
 public class TestPPStarDist {
 	// *** CONFIGURATION ***
 		
-	double sunk_awareness = 0.4; // k value (0=fully sunk, 1=straightforward bidding)
+	//double sunk_awareness = 0.0; // k value (0=fully sunk, 1=straightforward bidding)
 	
 	int no_goods = 5;
 	
-	double ask_price = 0;		// initial ask price
+	double ask_price = 1;		// initial ask price
 	double ask_epsilon = 1; 	// initial ask epsilon
 	int nth_pay = 1;			// first price auction
 	
-	int no_iterations = 100;
+	int no_iterations = 10000;
 	
 	// *** VARIABLES ***
 	int no_pp_agents;
@@ -32,11 +38,16 @@ public class TestPPStarDist {
 	int no_ppstar_gains = 0;
 	double avg_ppstar_loss = 0;
 	double avg_ppstar_gain = 0;
-
-	public TestPPStarDist(int no_pp_agents, int no_ppstar_agents) {
+	
+	ArrayList<ArrayList<DiscreteDistribution>> welldist_pp;
+	ArrayList<ArrayList<DiscreteDistribution>> ppstardist_pp;
+	
+	public TestPPStarDist(int no_pp_agents, int no_ppstar_agents, ArrayList<ArrayList<DiscreteDistribution>> welldist_pp, ArrayList<ArrayList<DiscreteDistribution>> ppstardist_pp) {
 		this.no_pp_agents = no_pp_agents;
 		this.no_ppstar_agents = no_ppstar_agents;
 		this.no_agents = no_pp_agents + no_ppstar_agents;
+		this.welldist_pp = welldist_pp;
+		this.ppstardist_pp = ppstardist_pp;
 	}
 	
 	public void run() {
@@ -53,7 +64,7 @@ public class TestPPStarDist {
 		
 		// Print Results
 		System.out.println("no_iterations: " + no_iterations);
-		System.out.println("sunk_awareness: " + sunk_awareness);
+		//System.out.println("sunk_awareness: " + sunk_awareness);
 		
 		System.out.println("");
 		
@@ -76,18 +87,15 @@ public class TestPPStarDist {
 		System.out.println("");
 	}
 	
-	private void iteration() {
-		ArrayList<DiscreteDistribution> pd1 = null;
-		ArrayList<DiscreteDistribution> pd2 = null;
-		
+	private void iteration() {		
 		List<Agent> agents = new ArrayList<Agent>(no_agents);
 		// Create PP agents first
 		for (int i = 0; i<no_pp_agents; i++)
-			agents.add(new DistributionPPAgent(i, new SchedulingValuation(no_goods), pd1));
+			agents.add(new DistributionPPAgent(i, new SchedulingValuation(no_goods), welldist_pp.get((int)(Math.random() * welldist_pp.size()))));
 		
 		// Create PPStar agents next.
 		for (int i = 0; i<no_ppstar_agents; i++)
-			agents.add(new DistributionPPStarAgent(no_pp_agents + i, new SchedulingValuation(no_goods), pd2));
+			agents.add(new DistributionPPStarAgent(no_pp_agents + i, new SchedulingValuation(no_goods), ppstardist_pp.get((int)(Math.random() * ppstardist_pp.size()))));
 		
 		// Create one auction per good
 		List<SBAuction> auctions = new ArrayList<SBAuction>(no_goods);
@@ -128,13 +136,63 @@ public class TestPPStarDist {
 		}
 	}
 	
+	@SuppressWarnings("unchecked")
 	public static void main(String args[]) {
 		int no_agents = 8;
+		
+		String welldist_folder = "../saa_welldist_pp/";
+		String ppstardist_folder = "../saa_ppstardist_pp/";
+		
+		// Load predicted price data
+		ArrayList<ArrayList<DiscreteDistribution>> welldist_pp = new ArrayList<ArrayList<DiscreteDistribution>>();
+			
+		for(String fname : new File(welldist_folder).list()) {
+			try {
+				FileInputStream fis = new FileInputStream(welldist_folder + fname);
+				ObjectInputStream ois = new ObjectInputStream(fis);
 				
-		for (int i = 0; i<= 8; i++) {
+				welldist_pp.add((ArrayList<DiscreteDistribution>)ois.readObject());
+			} catch (ClassNotFoundException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			} catch (FileNotFoundException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();				
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		}
+		
+		System.out.println("Loaded " + welldist_pp.size() + " Wellman Dist price distributions.");
+		
+		ArrayList<ArrayList<DiscreteDistribution>> ppstardist_pp = new ArrayList<ArrayList<DiscreteDistribution>>();
+
+		for(String fname : new File(ppstardist_folder).list()) {
+			try {
+				FileInputStream fis = new FileInputStream(ppstardist_folder + fname);
+				ObjectInputStream ois = new ObjectInputStream(fis);
+				
+				ppstardist_pp.add((ArrayList<DiscreteDistribution>)ois.readObject());
+			} catch (ClassNotFoundException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			} catch (FileNotFoundException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();				
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		}
+		
+		System.out.println("Loaded " + ppstardist_pp.size() + " PPStar Dist price distributions.");
+		
+		for (int i = 8; i >= 0; i--) {
 			System.out.println("----PP_AGENTS = " + i + ", NO_PPSTAR_AGENTS = " + (no_agents-i) + "-------");
-			TestPPStarDist test = new TestPPStarDist(i, no_agents-i);
+			TestPPStarDist test = new TestPPStarDist(i, no_agents-i, welldist_pp, ppstardist_pp);
 			test.run();
 		}
 	}
 }
+ 

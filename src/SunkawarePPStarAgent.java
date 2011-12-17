@@ -8,13 +8,16 @@ import java.util.ArrayList;
 public class SunkawarePPStarAgent extends PerceivedPriceStarAgent {
 	double k;
 	
+	// where k determines the amount of sunk-awareness. k=0 is fully sunk-aware, k=1 is
+	// equiv. to straightforward bidding
+	
+	// first constructor: required PrOfBids
 	public SunkawarePPStarAgent(int agent_idx, Valuation valuation, ArrayList<Double> PrOfBids, double k) {
 		super(agent_idx, valuation, PrOfBids);
 		this.k = k;
 	}
 	
-	// where k determines the amount of sunk-awareness. k=0 is fully sunk-aware, k=1 is
-	// equiv. to straightforward bidding
+	// second constructor: assumes PrOfBids == 0
 	public SunkawarePPStarAgent(int agent_idx, Valuation valuation, double k) {
 		super(agent_idx, valuation);
 		this.k = k;

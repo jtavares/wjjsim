@@ -6,6 +6,11 @@ import java.util.ArrayList;
 
 public class DistributionPPStarAgent extends PerceivedPriceStarAgent {
 	ArrayList<DiscreteDistribution> pd;
+
+	public DistributionPPStarAgent(int agent_idx, Valuation valuation, ArrayList<Double> PrOfBids, ArrayList<DiscreteDistribution> pd) {
+		super(agent_idx, valuation, PrOfBids);
+		this.pd = pd;
+	}
 	
 	public DistributionPPStarAgent(int agent_idx, Valuation valuation, ArrayList<DiscreteDistribution> pd) {
 		super(agent_idx, valuation);
