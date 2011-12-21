@@ -9,7 +9,7 @@ public class SimultaneousAscendingAuctionSunkawareClient {
 	
     public static void main(String[] args) throws IOException {
     	
-    	System.out.println("SimultaneousAscendingAuctionRandomClient starting");	
+    	System.out.println("SimultaneousAscendingAuctionSunkawareClient starting");	
     	
         Socket auctSocket = null;
         PrintWriter out = null;
@@ -41,7 +41,7 @@ public class SimultaneousAscendingAuctionSunkawareClient {
         int numSlotsNeeded = -1;
         int deadline = -1;
         double[] valuations = null;
-        System.out.println("test 3");
+        
         
         try {
             auctSocket = new Socket(hostName, socketNum);
@@ -117,7 +117,7 @@ public class SimultaneousAscendingAuctionSunkawareClient {
         		int  ask_price=0;
         	    int  ask_epsilon=0;
         	    agents= new ArrayList<Agent>();
-        	    auctions=new ArrayList<SBAuction>(numSlotsNeeded);
+        	    auctions=new ArrayList<SBAuction>(valuations.length);
         	    agents.add(agent);
         	     
         		for (int i =0;i< valuations.length; i++)
