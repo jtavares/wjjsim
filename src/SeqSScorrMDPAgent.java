@@ -278,5 +278,6 @@ public class SeqSScorrMDPAgent extends SeqSSMDPAgent {
 		bids.put(current_auction, pi.get(state));
 		return bids;
 	}
+	
 
 }

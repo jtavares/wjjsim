@@ -118,7 +118,12 @@ public class Sequential2ndPriceAuctionClient {
                 //  or use them to initialize an agent class you wrote.
                 ///////////////////////////////////////////////
                 
-                //EDIT HERE!
+             
+        		
+        		
+           
+                
+                
                 
                 ///////////////////////////////////////////////
                 out.println( "Parameters accepted" );
