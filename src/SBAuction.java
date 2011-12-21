@@ -19,6 +19,8 @@ public abstract class SBAuction {
 	private double total_revenue;
 	private double last_ask_price; // the ask price of the previous round
 	
+
+	
 	public SBAuction(int auction_idx, double reserve_price, List<Agent> agents, AllocationRule ar, PaymentRule pr) {
 		this.auction_idx = auction_idx;
 		this.agents = agents;

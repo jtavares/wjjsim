@@ -9,6 +9,15 @@ public class SchedulingValuation extends Valuation {
 	int no_slots_req; 				// number of slots required, \lambda_{j}, [1, ..., M]
 	LinkedList<Integer> values;		// v(t)
 	
+	public SchedulingValuation(int no_slots_req, double[] value_list) {
+		super(value_list.length);
+		this.no_slots_req = no_slots_req;
+		
+		values = new LinkedList<Integer>();
+		for (int i = 0; i < value_list.length; i++)
+			values.add((int) value_list[i]);
+	}
+	
 	public SchedulingValuation(int no_slots) {
 		super(no_slots);
 

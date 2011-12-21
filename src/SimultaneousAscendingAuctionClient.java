@@ -22,6 +22,8 @@
  * Remember to use the same formatting for output messages as the example code.
  * 
  * For help, contact: tom_goff@brown.edu
+ * 
+ * Updated Code : Wenjun Wang 
  */
 
 
@@ -41,8 +43,12 @@ public class SimultaneousAscendingAuctionClient {
         PrintWriter out = null;
         BufferedReader in = null;
 
-        String hostName = "192.168.40.1";//IP of host (may be local IP)
-        int socketNum = 7; //the luckiest socket
+        String hostName = "127.0.0.1";//IP of host (may be local IP)
+        int socketNum = 1305; //the luckiest socket
+        
+        Agent agent = null;
+        Valuation valuationMethod = null;
+        
         try {
             in = new BufferedReader(new FileReader("./src/IP_and_Port.txt"));
             //two lines in this file.  First is hostName/IP address, and second is socket number of host 
@@ -112,6 +118,7 @@ public class SimultaneousAscendingAuctionClient {
                 for(int i=3; i< params.length; i++)
                 	valuations[i-3] = Double.valueOf(params[i]);
                 
+                
                 ///////////////////////////////////////////////
                 //  YOUR CODE HERE
                 //  You probably want to store the parameters sent from host.
@@ -119,8 +126,18 @@ public class SimultaneousAscendingAuctionClient {
                 //  or use them to initialize an agent class you wrote.
                 ///////////////////////////////////////////////
                 
-                //EDIT HERE!
+                //EDIT HERE
+                //??  how to define the number for each agent ?
+                //?? whether to change to another kind of agent 
+              
+                valuationMethod=new SchedulingValuation(numSlotsNeeded,valuations);
+        		agent = new SunkawarePPAgent(0,valuationMethod,0);
                 
+        		// Send starting information= to agents
+        //		agent.postResult(new Result(null, false, 0, ar.getAskPrice(), 0, ar.getAskEpsilon()));
+
+        		agent.openAllAuctions();
+        		
                 ///////////////////////////////////////////////
                 out.println( "Parameters accepted" );
         	}
@@ -143,16 +160,35 @@ public class SimultaneousAscendingAuctionClient {
         		//Note:  bids get rounded to 2 decimal places by host. 5.031 -> 5.03
                 ///////////////////////////////////////////////
                 
+        		/*
         		String myBids = "";
-                
-        		//EDIT HERE!
         		Random r = new Random();//make random bids... 1 for each time slot
         		for(int i=0; i < valuations.length; i++){
         			myBids = myBids + (r.nextDouble()*10);//random bid 0 to 10
         			if(i < valuations.length-1)
         				myBids = myBids + " ";//separate bids with a space!  IMPORTANT!
         		}
+        		*/
         		
+        		//EDIT HERE!
+        		
+        		HashMap<Integer,Double> a_bids= agent.getBids();
+        		String myBids="";
+        		for (int i=0;i<valuations.length;i++) 
+        		{
+        			if (a_bids.containsKey(i))
+        			{
+        				myBids=myBids+a_bids.get(i);
+        			}
+        			else 
+        			{
+        				myBids=myBids+0.0;
+        			}
+        			
+        			if(i<valuations.length-1)
+        				myBids= myBids+" ";
+        		}
+        			
         		///////////////////////////////////////////////
         		
         		out.println(myBids); //Send agent's bids to server
@@ -197,6 +233,7 @@ public class SimultaneousAscendingAuctionClient {
                 ///////////////////////////////////////////////
         		
         		//EDIT HERE
+        		
         		
         		///////////////////////////////////////////////
         		out.println( "State Observed" );//let the server know client received state info
