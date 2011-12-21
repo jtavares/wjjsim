@@ -18,7 +18,7 @@ public class SimultaneousAscedningAuctionRandomClient {
         
         Agent agent = null;
         Valuation valuationMethod = null;
-        String agent_name=null;
+        String agent_name="Anonymous";
         List<SBAuction> auctions=null;
 	    List<Agent> agents=null;
 	    
@@ -114,14 +114,18 @@ public class SimultaneousAscedningAuctionRandomClient {
         		
         		int  ask_price=0;
         	    int  ask_epsilon=0;
-        	     agents.add(agent);
+        	    agents= new ArrayList<Agent>();
+        	    auctions=new ArrayList<SBAuction>(numSlotsNeeded);
+        	    agents.add(agent);
         	     
-        		for (int i =0;i< numSlotsNeeded; i++)
+        		for (int i =0;i< valuations.length; i++)
         		{
         		SBAuction auction= new SBNPAuction(i, 0, 1, 1, agents, 1);
         		auctions.add(auction);
         		agent.postResult(new Result(auctions.get(i), false, 0, ask_price, 0, ask_epsilon));
         		}
+        
+        		System.out.println("Auctionsize : "+auctions.size());
         		agent.openAllAuctions();
         		
                 ///////////////////////////////////////////////
@@ -218,19 +222,23 @@ public class SimultaneousAscedningAuctionRandomClient {
         		//  as well as the current leading bids.
                 ///////////////////////////////////////////////
         		
+        
         		
-        		for (int i =0;i<numTimeSlots;i++)
+        		if (currentRound>0)
         		{
-	        		boolean is_winner=false;
-	        		if (leaderIDs[i].equals(agent_name))
+        			for (int i =0;i<numTimeSlots;i++)
 	        		{
-	        			is_winner=true;
+		        		boolean is_winner=false;
+		        		if (leaderIDs[i].equals(agent_name))
+		        		{
+		        			is_winner=true;
+		        		}
+		        		
+		        		int  ask_epsilon=1;
+		        		double ask_price=leaderBids[i]+ask_epsilon;
+		        		
+		        		agent.postResult(new Result(auctions.get(i), is_winner, 0, ask_price, 0, ask_epsilon));
 	        		}
-	        		
-	        		int  ask_epsilon=1;
-	        		double ask_price=leaderBids[i]+ask_epsilon;
-	        		
-	        		agent.postResult(new Result(auctions.get(i), is_winner, 0, ask_price, 0, ask_epsilon));
         		}
         		
         		///////////////////////////////////////////////
