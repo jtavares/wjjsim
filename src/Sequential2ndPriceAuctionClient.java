@@ -88,10 +88,11 @@ public class Sequential2ndPriceAuctionClient {
             	BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
                 System.out.println("Enter a unique ID string...");
                 
-                out.println( br.readLine() );//prompt user for an ID string
+                //out.println( br.readLine() );//prompt user for an ID string
                 //OPTIONAL CHANGE:
                 //YOU MAY CHOOSE TO REPLACE THE LINE ABOVE WITH THE LINE BELOW
                 //out.println("My_Hardcoded_Name");
+                out.println("WJJSIM" + (int)(Math.random() * 100)); //br.readLine();
                 
                 System.out.println("User ID sent.  If prompted again, choose another ID/Name string.");
                 System.out.println("Waiting for server to start auction...");

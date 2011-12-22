@@ -25,7 +25,7 @@ import java.io.*;
 
 public class SimultaneousAscendingAuctionServer {
 	
-    public static void main(String[] args) throws IOException {
+    public static void main(String[] args) throws IOException, InterruptedException {
     	
     	System.out.println("Auction Server starting");
     	try {  // Get hostname by textual representation of IP address
@@ -39,8 +39,8 @@ public class SimultaneousAscendingAuctionServer {
     	
     	//used to let host user control flow of program
     	BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
-    	System.out.println("How many players are needed?");
-        int numPlayersNeeded = Integer.valueOf(br.readLine());
+    	//System.out.println("How many players are needed?");
+        int numPlayersNeeded = 2; //Integer.valueOf(br.readLine());
     	
         
     	//make an auction with which clients interact
@@ -107,10 +107,13 @@ public class SimultaneousAscendingAuctionServer {
         
         //The auction is running right now... can you feel it?
         
-        System.out.println("Press Enter to end host connections and close...");
-        br.readLine();
+        //System.out.println("Press Enter to end host connections and close...");
+        //br.readLine();
 
-        System.out.println("Auction is complete... closing connections");
+        //System.out.println("Auction is complete... closing connections");
+        for (int i =0; i<myThreads.size(); i++)
+        	myThreads.get(i).join();
+        	
         for(int i=0; i < myThreads.size(); i++)
         	if( myThreads.get(i).isAlive() )
         		myThreads.get(i).closeConnection();
