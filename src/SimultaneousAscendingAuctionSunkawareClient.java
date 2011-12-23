@@ -413,10 +413,18 @@ public class SimultaneousAscendingAuctionSunkawareClient {
 						}
 
 						int ask_epsilon = 1;
-						double ask_price = leaderBids[i] + ask_epsilon;
+						double cur_price = leaderBids[i];
+						double payment = 0;
+		        		
+		        		if (is_winner)
+		        			payment = cur_price;
+		        		else
+		        			payment = 0;
+		        		
+						double ask_price = cur_price + ask_epsilon;
 
 						agent.postResult(new Result(auctions.get(i), is_winner,
-										 leaderBids[i], ask_price, leaderBids[i], ask_epsilon));
+										 payment, ask_price, cur_price, ask_epsilon));
 					}
 				}
 

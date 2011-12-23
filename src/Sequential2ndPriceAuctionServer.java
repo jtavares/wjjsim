@@ -28,7 +28,7 @@ import java.io.*;
 
 public class Sequential2ndPriceAuctionServer {
 	
-    public static void main(String[] args) throws IOException {
+    public static void main(String[] args) throws IOException, InterruptedException {
     	
     	System.out.println("Auction Server starting");
     	try {  // Get hostname & IP address
@@ -42,8 +42,8 @@ public class Sequential2ndPriceAuctionServer {
     	
     	//used to let host user control flow of program
     	BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
-    	System.out.println("How many players are needed?");
-        int numPlayersNeeded = Integer.valueOf(br.readLine());
+    	//System.out.println("How many players are needed?");
+        int numPlayersNeeded = 2;//Integer.valueOf(br.readLine());
     	
         
     	//make an auction with which clients interact
@@ -107,10 +107,12 @@ public class Sequential2ndPriceAuctionServer {
         System.out.println("\nAuction has started with " + myThreads.size() + " agents!\n");
         
         
-        System.out.println("Press Enter to continue... to the end...");
-        br.readLine();
+        //System.out.println("Press Enter to continue... to the end...");
+        //br.readLine();
         
-        
+
+        for(int i=0; i < myThreads.size(); i++)
+        	myThreads.get(i).join();
 
         System.out.println("Auction is complete... closing connections");
         

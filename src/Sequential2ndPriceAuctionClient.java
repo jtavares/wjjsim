@@ -152,6 +152,9 @@ public class Sequential2ndPriceAuctionClient {
         		Random r = new Random();//make random bids...
         		String myBid = ""+ (r.nextDouble()*10);
         		
+        		//debug, always bid fixed value
+        		myBid = "1.0";
+        		
         		///////////////////////////////////////////////
         		out.println(""+myBid); //Send agent's bids to server (as a string)
         		System.out.println("My bid: " + myBid);
